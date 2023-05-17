@@ -36,6 +36,14 @@ app.use("/api/users", userRouters);
 
 app.use("/api/FF", FFRoutes);
 
+// app.get("/", async (req, res) => {
+
+//     const foldersAndFiles = await FFModel.FolderModel.find({});
+//     res.status(200).json(foldersAndFiles);
+// });
+
+app.use("/api/FF", FFRoutes);
+
 
 
 
