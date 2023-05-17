@@ -12,5 +12,3 @@ mongoose.connect(env.MONGO_CONNECTION_STRING)
         });
     })
     .catch(console.error);
-
-

@@ -2,7 +2,8 @@ import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import morgan from "morgan";
 import createHttpError, { isHttpError } from "http-errors";
-
+import FFRoutes from "./Routers/foldersAndFiles";
+import * as FFModel from "./models/folder";
 
 const app = express();
 
@@ -10,9 +11,18 @@ app.use(morgan('dev'));
 
 app.use(express.json());
 
+
 // TODO: File object upload
 // TODO: User upload 
 // TODO: Mission 
+
+// app.get("/", async (req, res) => {
+
+//     const foldersAndFiles = await FFModel.FolderModel.find({});
+//     res.status(200).json(foldersAndFiles);
+// });
+
+app.use("/api/FF", FFRoutes);
 
 
 
