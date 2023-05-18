@@ -1,4 +1,5 @@
 import {Schema,InferSchemaType, model} from "mongoose";
+import mongoose from "mongoose";
 
 interface dataI {
     userId: Schema.Types.ObjectId,
@@ -17,9 +18,9 @@ const baseOptions = {
 
 
 const folderSchema = new Schema({
-    userId: { type: Schema.Types.ObjectId },
+    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId('6348acd2e1a47ca32e79f46f')},
     title: { type: String},
-    parentId: {type: Schema.Types.ObjectId},
+    parentId: {type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId('6348acd2e1a47ca32e79f46f')},
 
 }, baseOptions);
 
@@ -29,15 +30,16 @@ const dataSchemaExtra = new Schema({
 });
 
 
-type Folder = InferSchemaType<typeof folderSchema>;
+type Base = InferSchemaType<typeof folderSchema>;
 
-const FolderModel = model<Folder>('Folder', folderSchema);
+const BaseModel = model<Base>('Base', folderSchema);
+
+const FolderModel = BaseModel.discriminator('Folder', new Schema({}));
 
 
+const FileModel = BaseModel.discriminator('File',dataSchemaExtra);
 
-const DataModel = FolderModel.discriminator('Data',dataSchemaExtra);
-
-export {FolderModel, DataModel};
+export {FolderModel, FileModel};
 
 
 // type Note = InferSchemaType<typeof folderSchema>;
