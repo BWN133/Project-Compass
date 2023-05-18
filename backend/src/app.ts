@@ -37,10 +37,28 @@ app.use("/api/users", userRouters);
 app.use("/api/FF", FFRoutes);
 
 // app.get("/", async (req, res) => {
+//     const folder = new FFModel.FolderModel({
+//         title: "test saved 1",
+//     });
 
-//     const foldersAndFiles = await FFModel.FolderModel.find({});
-//     res.status(200).json(foldersAndFiles);
+//     folder.save((err, savedOrder) => {
+//         console.log(JSON.stringify(savedOrder));
+//     });
+//     console.log(process.cwd());
+
+//     const img = fs.readFileSync('./img1.jpeg');
+//     // const encode_image = img.toString('base64');
+//     const file = new FFModel.FileModel({
+//         title: "test saved img 1",
+//         fileType: "Img",
+//         fileContent: img,
+//     });
+//     file.save((err, savedOrder) => {
+//         console.log(JSON.stringify(savedOrder));
+//     });
 // });
+
+
 
 app.use("/api/FF", FFRoutes);
 
