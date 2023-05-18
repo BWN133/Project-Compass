@@ -1,10 +1,10 @@
-import express from "express";
-import * as FFController from "../Controllers/foldersAndFiles";
+// import express from "express";
+// import * as FFController from "../Controllers/foldersAndFiles";
 
-const router = express.Router();
+// const router = express.Router();
 
-router.get("/", FFController.GetAllFoldersAndFiles);
+// router.get("/", FFController.GetAllFoldersAndFiles);
 
-router.post("/folder", FFController.createFolder);
+// router.post("/folder", FFController.createFolder);
 
-export default router;
+// export default router;
