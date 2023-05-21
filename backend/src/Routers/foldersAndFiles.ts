@@ -20,19 +20,13 @@ const storage = new GridFsStorage({
   const upload = multer({storage});
   
 
-
-router.get("/", FFController.GetAllFoldersAndFiles);
-
-router.get("/test", FFController.testGetImg);
-
 router.post("/folder", FFController.createFolder);
 
 router.post("/file", upload.single('fileContent'), FFController.createFile);
 
-router.get("/folder",FFController.GetAllFolders);
+router.get("/folder/:parentFieldId",FFController.GetFileFromParent);
 
-router.get("/file", FFController.GetAllFiles);
-
+router.get("/file/:fileId", FFController.GetFile);
 router.get("/:objectId", FFController.GetFF);
 
 router.delete("/:objectId", FFController.DeleteFF);

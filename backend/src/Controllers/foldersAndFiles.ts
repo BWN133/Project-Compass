@@ -16,18 +16,19 @@ interface CreateFolderBody{
 
 export const createFolder: RequestHandler<unknown, unknown, CreateFolderBody, unknown>  = async(req, res, next) => {
     //TODO:  Authentication
+    console.log(req.body.title);
     const title = req.body.title;
     const parentId = req.body.parentId;
     
     try{
         if (!title) {
-            throw createHttpError(400, "Note must have a title");
+            throw createHttpError(400, "Folder must have a title");
         }
         const foldersAndFiles = await FFModel.FolderModel.create({
             userId: undefined ,
             title: title,
             parentId: parentId,
-            
+            objectType: "FOLDER",
         });
         res.status(201).json(foldersAndFiles);
     }catch(error){
@@ -60,27 +61,31 @@ export const DeleteAll: RequestHandler = async(req, res, next)=> {
 
 interface CreateFileBody{
     parentId?: string,
-    title?: string,
 }
 
 
 export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknown>  = async(req, res, next) => {
     //TODO:  Authentication
-    const title = req.body.title;
     const parentId = req.body.parentId;
     try{
-        if (!title) {
-            throw createHttpError(400, "Note must have a title");
+        if(!mongoose.isValidObjectId(parentId)){
+            throw createHttpError(400, "Invalid parent Id");
+        }
+        const parentFolder = await FFModel.FolderModel.findById(parentId);
+        if(!parentFolder || parentFolder.objectType == "FILE"){
+            throw createHttpError(400, "Incorrecrt parent ID");
         }
         if(!req.file){
-            throw createHttpError(400, "Please provide a file and filetype")
+            throw createHttpError(400, "Please provide a file and filetype");
         }
+        const title = req.file.originalname;
         console.log(req.file.filename);
         const foldersAndFiles = await FFModel.FileModel.create({
             userId: undefined ,
             title: title,
             parentId: parentId,
-            fileMeta: req.file.filename
+            fileMeta: req.file.filename,
+            objectType: "FILE",
         });
         res.status(201).json(foldersAndFiles);
     }catch(error){
@@ -88,55 +93,82 @@ export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknow
     }
 };
 
-// TODO: GetAll 
-export const GetAllFoldersAndFiles: RequestHandler = async(req, res, next) => {
-    //TODO:  Authentication
-    try{
-        // const parentId = req.params.parentId;
-        const foldersAndFiles = await FFModel.BaseModel.find({}).exec();
-        res.status(200).json(foldersAndFiles);
-    }catch(error){
-        next(error);
+//TODO: take in file object, return file Data
+const getFileHelper = async(file: FFModel.File) => {
+    if(!file){
+        throw  createHttpError(404, "File not found");
     }
-};
-
-
-export const testGetImg: RequestHandler = async(req, res, next) => {
-    //TODO:  Authentication
-    try{
-        // const parentId = req.params.parentId;
-        const foldersAndFiles = await FFModel.uploadMetaModel.find({}).exec();
-        res.status(200).json(foldersAndFiles);
-    }catch(error){
-        next(error);
+    const fileMeta = await FFModel.uploadMetaModel.find({filename:file.fileMeta});
+    if(!fileMeta){
+        throw createHttpError(404, "File content missing");
     }
-};
+    const fileContents = await FFModel.chunkModel.find({files_id : fileMeta[0].id}).sort("-postDate");
+    const resultFileData = {
+        'fileName':file.title,
+        fileContents
+        };
+    return resultFileData;
+}
 
-// TODO: GetAll Folders
-export const GetAllFolders: RequestHandler = async(req, res, next) =>{
+export const GetFile: RequestHandler = async(req, res, next) =>{
     // TODO: Authentication
+    const fileId = req.params.fileId;
+
     try{
-        const folders = await FFModel.FolderModel.find({__type: "Folder"});
-        res.status(200).json(folders);
+        if(!mongoose.isValidObjectId(fileId)){
+            throw createHttpError(400, "Invalid file id");
+        }
+        const file = await FFModel.FileModel.findById(fileId).exec();
+
+        const resultFileData = await getFileHelper(<FFModel.File>file);
+        res.status(200).json(resultFileData);
     }catch(error){
         next(error);
     }
 };
 
-
-
-// TODO: Getall Files 
-export const GetAllFiles: RequestHandler = async(req, res, next) =>{
-    // TODO: Authentication
+export const GetFileFromParent:RequestHandler = async(req, res, next) => {
+    const parentFieldId = req.params.parentFieldId;
     try{
-        const files = await FFModel.FolderModel.find({__type: "File"});
-        res.status(200).json(files);
+        if(!mongoose.isValidObjectId(parentFieldId)){
+            throw createHttpError(400, "Invalid file id");
+        }
+        const subFileCursor = await FFModel.BaseModel.find({parentId: parentFieldId}).cursor();
+        const result = [];
+        for (let document = await subFileCursor.next(); document != null; document = await subFileCursor.next()){
+            if(document.objectType == 'FOLDER'){
+                result.push(document);
+            }else{
+                const fileResult = await getFileHelper(<FFModel.File> document);
+                result.push(fileResult);
+            }
+        }
+        res.status(200).json(result);
     }catch(error){
         next(error);
     }
-};
+}
 
-// TODO: Delete File
+const deleteFileHelper = async(file: FFModel.File) =>{
+    if(!file){
+        throw  createHttpError(404, "File not found");
+    }
+    const fileMeta = await FFModel.uploadMetaModel.find({filename:file.fileMeta});
+    if(!fileMeta){
+        throw createHttpError(404, "File content missing");
+    }
+    const fileContentsCursor = await FFModel.chunkModel.find({files_id : fileMeta[0].id}).cursor();
+    for (let document = await fileContentsCursor.next(); document != null; document = await fileContentsCursor.next()){
+        document.remove();
+    }
+    fileMeta[0].remove();
+    return
+}
+
+/* TODO: Delete File 
+    1. Have an edge case that if the file itself is a file not a folder, chunk and file data won't be delted 
+    2. Need to switch helper function a bit.
+*/
 export const DeleteFF: RequestHandler = async(req, res, next) =>{
     // TODO: Authentication
     const objectID = req.params.objectId;
@@ -150,14 +182,20 @@ export const DeleteFF: RequestHandler = async(req, res, next) =>{
         }
         await object.remove();
 
-        await FFModel.FolderModel.deleteMany({parentId: objectID});
-
+        const subFoldersAndFilesCursor = await FFModel.BaseModel.find({parentId: objectID}).cursor();
+        for (let document = await subFoldersAndFilesCursor.next(); document != null; document = await subFoldersAndFilesCursor.next()){
+            if(document.objectType == 'FOLDER'){
+                document.remove();
+            }else{
+                deleteFileHelper(<FFModel.File>document);
+            }
+        }
         res.sendStatus(204);
-        
     }catch(error){
         next(error);
     }
 }
+
 
 
 // TODO: get Specific Folder || File

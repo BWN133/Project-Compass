@@ -12,14 +12,18 @@ const baseOptions = {
 
 const folderSchema = new Schema({
     userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId('6348acd2e1a47ca32e79f46f')},
-    title: { type: String},
+    title: { type: String, defualt: "none"},
     parentId: {type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId('6348acd2e1a47ca32e79f46f')},
+    objectType: {type: String},
 }, baseOptions);
 
 const fileSchema = new Schema({
-    folderSchema,
+    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId('6348acd2e1a47ca32e79f46f')},
+    title: { type: String, defualt: "none"},
+    parentId: {type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId('6348acd2e1a47ca32e79f46f')},
+    objectType: {type: String},
     fileMeta:{type: String},
-});
+}, baseOptions);
 
 
 type Base = InferSchemaType<typeof folderSchema>;
@@ -40,7 +44,7 @@ const FileModel = BaseModel.discriminator<File>('File', fileSchema);
 
 
 
-export {FolderModel, FileModel, BaseModel, uploadMetaModel,chunkModel };
+export {FolderModel, FileModel, BaseModel, uploadMetaModel, chunkModel, File, Base};
 
 
 
