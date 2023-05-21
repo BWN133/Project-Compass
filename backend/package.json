@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.0",
+    "body-parser": "^1.20.2",
     "connect-mongo": "^4.6.0",
     "dotenv": "^16.0.3",
     "envalid": "^7.3.1",
@@ -21,7 +22,9 @@
     "http-errors": "^2.0.0",
     "mongodb": "^5.5.0",
     "mongoose": "^6.8.1",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "multer-gridfs-storage": "^5.0.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
@@ -29,6 +32,8 @@
     "@types/express-session": "^1.17.7",
     "@types/http-errors": "^2.0.1",
     "@types/morgan": "^1.9.3",
+    "@types/multer": "^1.4.7",
+    "@types/multer-gridfs-storage": "^4.0.5",
     "@typescript-eslint/eslint-plugin": "^5.59.6",
     "@typescript-eslint/parser": "^5.59.6",
     "eslint": "^8.30.0",

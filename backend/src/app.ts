@@ -2,9 +2,7 @@ import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import morgan from "morgan";
 import createHttpError, { isHttpError } from "http-errors";
-// import FFRoutes from "./Routers/foldersAndFiles";
-import * as FFModel from "./models/folder";
-import fs from "fs";
+import FFRoutes from "./Routers/foldersAndFiles";
 import userRouters from "./Routers/users"
 import session from "express-session";
 import env from "./util/validateEnv";
@@ -15,7 +13,7 @@ app.use(morgan('dev'));
 
 app.use(express.json());
 
-// place is important for session
+
 
 app.use(session({
     secret: env.SESSION_SECRET,
@@ -62,7 +60,7 @@ app.use("/api/users", userRouters);
 
 
 
-// app.use("/api/FF", FFRoutes);
+app.use("/api/FF", FFRoutes);
 
 
 
