@@ -29,7 +29,7 @@ router.get("/folder/:parentFieldId",FFController.GetFileFromParent);
 router.get("/file/:fileId", FFController.GetFile);
 router.get("/:objectId", FFController.GetFF);
 
-router.delete("/:objectId", FFController.DeleteFF);
+router.delete("/folder/:objectId", FFController.deleteFolder);
 
 router.delete("/",  FFController.DeleteAll);
 

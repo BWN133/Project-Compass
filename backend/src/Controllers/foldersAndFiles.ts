@@ -93,6 +93,8 @@ export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknow
     }
 };
 
+
+
 //TODO: take in file object, return file Data
 const getFileHelper = async(file: FFModel.File) => {
     if(!file){
@@ -110,10 +112,11 @@ const getFileHelper = async(file: FFModel.File) => {
     return resultFileData;
 }
 
+
+
 export const GetFile: RequestHandler = async(req, res, next) =>{
     // TODO: Authentication
     const fileId = req.params.fileId;
-
     try{
         if(!mongoose.isValidObjectId(fileId)){
             throw createHttpError(400, "Invalid file id");
@@ -163,13 +166,13 @@ const deleteFileHelper = async(file: FFModel.File) =>{
     }
     fileMeta[0].remove();
     return
-}
+};
 
 /* TODO: Delete File 
     1. Have an edge case that if the file itself is a file not a folder, chunk and file data won't be delted 
     2. Need to switch helper function a bit.
 */
-export const DeleteFF: RequestHandler = async(req, res, next) =>{
+export const deleteFolder: RequestHandler = async(req, res, next) =>{
     // TODO: Authentication
     const objectID = req.params.objectId;
     try{
@@ -195,6 +198,34 @@ export const DeleteFF: RequestHandler = async(req, res, next) =>{
         next(error);
     }
 }
+
+export const deleteFile: RequestHandler = async (req, res, next) => {
+    const objectID = req.params.objectId;
+    try{
+        if(!mongoose.isValidObjectId(objectID)){
+            throw createHttpError(400, "Invalid note id");
+        }
+        const object = FFModel.FileModel.findById(objectID);
+        if(!object){
+            throw createHttpError(404, "Note not found");
+        }
+        await object.remove();
+
+        const subFoldersAndFilesCursor = await FFModel.BaseModel.find({parentId: objectID}).cursor();
+        res.sendStatus(204);
+    }catch(error){
+        next(error);
+    }
+}
+
+// export const deleteFF: RequestHandler = async (req, res, next) => {
+//     const objectID = req.params.objectId;
+//     try{
+
+//     }catch(error){
+        
+//     }
+// }
 
 
 
