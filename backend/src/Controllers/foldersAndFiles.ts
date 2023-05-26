@@ -216,36 +216,3 @@ export const deleteFile: RequestHandler = async (req, res, next) => {
     }
 }
 
-
-
-
-
-// TODO: get Specific Folder || File
-export const GetFF: RequestHandler = async (req, res, next) =>{
-    const objectID = req.params.objectId;
-    try{
-        if (!mongoose.isValidObjectId(objectID)) {
-            throw createHttpError(400, "Invalid note id");
-        }
-        const note = await FFModel.FolderModel.findById(objectID).exec();
-        if(!note){
-            throw createHttpError(404, "Note not found");
-        }
-        
-    } catch(error){
-        next(error);
-    }
-
-};
-
-interface UpdateNoteParams {
-    ffID: mongoose.Types.ObjectId,
-}
-
-interface UpdateFFBody{
-    title?: string,
-    parentId?: mongoose.Types.ObjectId,
-    fileType?: string,
-    fileContent?: Buffer,
-}
-
