@@ -1,4 +1,4 @@
-import {File, Folder} from "../models/data";
+import {FF as FFModel} from "../models/data";
 import { ConflictError, UnauthorizedError } from "../errors/http_errors";
 async function fetchData(input: RequestInfo, init?: RequestInit) {
     console.log(input);
@@ -19,7 +19,12 @@ async function fetchData(input: RequestInfo, init?: RequestInit) {
 }
 
 
-export async function fetchFolder(): Promise<Folder[]> {
+export async function fetchFolder(): Promise<FFModel[]> {
     const response = await fetchData("http://localhost:5000/api/FF", { method: "GET" });
+    return response.json();
+}
+
+export async function fecthFolderFromParentId(parentId: string): Promise<FFModel[]> {
+    const response = await fetchData("http://localhost:5000/api/FF/Folder/" + parentId , { method: "GET" });
     return response.json();
 }
