@@ -7,10 +7,11 @@ import {FF as FFModel} from "../models/data";
 
 interface FFCardProps {
     FFContent: FFModel,
+    onclicked: (ffInput: string) => void,
     className?: string,
 }
 
-const FFCard = ({FFContent, className}:FFCardProps) => {
+const FFCard = ({FFContent, onclicked,className}:FFCardProps) => {
     const {
         title,
         parentId,
@@ -20,9 +21,10 @@ const FFCard = ({FFContent, className}:FFCardProps) => {
     return (
     <Card
         className={`${styles.noteCard}`}
+        onClick={() => onclicked(FFContent._id)}
         >
           <Card.Body className={styles.cardBody}>
-          <AiFillFolder size={40} className={`${styleUtils.flexCenter}`}></AiFillFolder>
+          <AiFillFolder size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFolder>
           <Card.Title className={styleUtils.flexCenter}>
             {title}
           </Card.Title>

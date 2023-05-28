@@ -9,13 +9,13 @@ import stylesUtil from "./style/utils.module.css";
 
 
 function App() {
-
-
-
+  const [notHome, setIsHome] = useState<number>(0);
+  
   return (
   <Container>  
-    <DefaultPage 
-    parentId='6348acd2e1a47ca32e79f46f'
+    <DefaultPage
+    setDepth={setIsHome}
+    notHome={notHome}
     />
   </Container>
 

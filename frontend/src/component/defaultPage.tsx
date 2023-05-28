@@ -6,10 +6,16 @@ import FFCard from './FFCard';
 import stylesUtil from "../style/utils.module.css";
 import {Card}from "react-bootstrap";
 import {FF as FFModel} from "../models/data";
-interface pageProps{
-    parentId: string
+
+interface pageProps {
+    setDepth: (input:number) => void,
+    notHome: number,
 }
-const DefaultPage = ({parentId}: pageProps) => {
+
+const DefaultPage = ({setDepth, notHome}: pageProps) => {
+    const [parentId, parentIdSetter] = useState('6348acd2e1a47ca32e79f46f');
+    
+    let grandParentId:string  = '';
     const [FFData, setData] = useState<FFModel[]>([]);
     useEffect(() => {
         async function loadNotes() {
@@ -21,13 +27,18 @@ const DefaultPage = ({parentId}: pageProps) => {
             }
         }
         loadNotes();
-      }, []);
+      },[parentId]);
       const folderGrid =
       <Row xs={1} md={2} xl={3} className={`g-4 ${styles.notesGrid}`}>
           {FFData.map(FF => (
               <Col key={FF._id}>
                   <FFCard
                   FFContent={FF}
+                  onclicked = {(updatedParentId: string) => {
+                    setDepth(notHome + 1);
+                    grandParentId = parentId;
+                    parentIdSetter(updatedParentId);
+                }}
                   />
               </Col>
           ))}
@@ -35,6 +46,7 @@ const DefaultPage = ({parentId}: pageProps) => {
     
     return (    
     <>  
+    
         {FFData && folderGrid}
     </>);
 }
