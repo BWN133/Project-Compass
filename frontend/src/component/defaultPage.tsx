@@ -9,35 +9,63 @@ import {FF as FFModel} from "../models/data";
 
 interface pageProps {
     setDepth: (input:number) => void,
-    notHome: number,
+    depth: number,
+}
+export interface stateProps{
+    parentId: string,
+    grandParentId: string,
 }
 
-const DefaultPage = ({setDepth, notHome}: pageProps) => {
-    const [parentId, parentIdSetter] = useState('6348acd2e1a47ca32e79f46f');
-    
-    let grandParentId:string  = '';
-    const [FFData, setData] = useState<FFModel[]>([]);
+export interface FFDataProps{
+    FFData: FFModel[],
+    previousDepthBeforeUpdating: number,
+}
+
+const DefaultPage = ({setDepth, depth}: pageProps) => {
+    console.log("page depth", depth);
+    const [state, stateSetter] = useState<stateProps>({
+        parentId: '6348acd2e1a47ca32e79f46f',
+        grandParentId: '',
+    });
+    // const [parentId, parentIdSetter] = useState('6348acd2e1a47ca32e79f46f');
+    // const [previousDepth, previousDepthSetter] = useState(depth);
+    // const [grandParentId, grandParentIdSetter] = useState('');
+    const [FFDataModel, setDataModel] = useState<FFDataProps>({
+        FFData: [],
+        previousDepthBeforeUpdating: depth,
+    });
+    console.log("before useEffect ParentId", state.parentId, "and grandparentid", state.grandParentId);
     useEffect(() => {
         async function loadNotes() {
             try {
-                const Folders = await dataApi.fecthFolderFromParentId(parentId);
-                setData(Folders);
+                const inputParentId = FFDataModel.previousDepthBeforeUpdating <= depth ? state.parentId : state.grandParentId;
+                console.log("page inputParentId", inputParentId, "with previousDepth",FFDataModel.previousDepthBeforeUpdating, "and current depth", depth);
+                const Folders = await dataApi.fecthFolderFromParentId(inputParentId);
+                setDataModel({
+                    FFData: Folders,
+                    previousDepthBeforeUpdating: depth,
+                })
             } catch (error) {
                 console.error(error);
             }
         }
         loadNotes();
-      },[parentId]);
+      },[depth]);
+      console.log("break point 00");
       const folderGrid =
       <Row xs={1} md={2} xl={3} className={`g-4 ${styles.notesGrid}`}>
-          {FFData.map(FF => (
+          {FFDataModel.FFData.map(FF => (
               <Col key={FF._id}>
                   <FFCard
                   FFContent={FF}
                   onclicked = {(updatedParentId: string) => {
-                    setDepth(notHome + 1);
-                    grandParentId = parentId;
-                    parentIdSetter(updatedParentId);
+                    console.log("break point 02");
+                    stateSetter({
+                        grandParentId: state.parentId,
+                        parentId: updatedParentId,
+                    });
+                    console.log("break point 01");
+                    setDepth(depth + 1);
                 }}
                   />
               </Col>
@@ -47,7 +75,7 @@ const DefaultPage = ({setDepth, notHome}: pageProps) => {
     return (    
     <>  
     
-        {FFData && folderGrid}
+        {FFDataModel.FFData && folderGrid}
     </>);
 }
 
