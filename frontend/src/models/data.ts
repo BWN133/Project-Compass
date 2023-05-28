@@ -5,7 +5,8 @@ export interface File {
     createdAt: string,
     updatedAt: string,
     parentId: string,
-    fileType: string,
+    objectType: string,
+    __type: string
 }
 
 export interface Folder {
@@ -14,5 +15,7 @@ export interface Folder {
     createdAt: string,
     updatedAt: string,
     parentId: string,
+    objectType: string,
+    __type: string
 }
 

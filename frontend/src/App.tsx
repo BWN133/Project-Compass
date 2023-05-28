@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react';
 import {File as FileModel, Folder as FolderModel} from './models/data';
 import * as dataApi from './network/todo_api';
-import { Container } from 'react-bootstrap';
+import { Container, Button, Col, Row, Spinner} from 'react-bootstrap';
+import FFCard from './component/FFCard';
+import styles from "./style/NotesPage.module.css";
+import stylesUtil from "./style/utils.module.css";
+
 
 function App() {
   const [data_Points, setData] = useState<FolderModel[]>([]);
-  
+
   useEffect(() => {
     async function loadNotes() {
         try {
-            // const Folders = await dataApi.fetchFolder();
-            const FolderRes  = await fetch("http://localhost:5000/api/FF", {method: "GET"});
-            console.log("break point 3");
-            const Folders = await FolderRes.json();
+            const Folders = await dataApi.fetchFolder();
             setData(Folders);
         } catch (error) {
             console.error(error);
@@ -20,13 +21,29 @@ function App() {
     }
     loadNotes();
   }, []);
+
+  const folderGrid =
+  <Row xs={1} md={2} xl={3} className={`g-4 ${styles.notesGrid}`}>
+      {data_Points.map(FF => (
+          <Col key={FF._id}>
+              <FFCard
+              FFContent={FF}
+              />
+          </Col>
+      ))}
+  </Row>
+
+
   console.log(":break point 1", data_Points);
   console.log(data_Points);
   return (
-    <Container>    
-    <div>
+    <Container>  
+      {/* <div>
       {JSON.stringify(data_Points)}
-    </div> 
+      </div>  */}
+      {data_Points && folderGrid
+      }
+    
   </Container>
 
   );
