@@ -1,5 +1,6 @@
 import {Schema,InferSchemaType, model} from "mongoose";
 import mongoose from "mongoose";
+import env from "../util/validateEnv";
 
 
 
@@ -11,16 +12,16 @@ const baseOptions = {
 
 
 const folderSchema = new Schema({
-    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId('6348acd2e1a47ca32e79f46f')},
+    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID)},
     title: { type: String, defualt: "none"},
-    parentId: {type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId('6348acd2e1a47ca32e79f46f')},
+    parentId: {type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID)},
     objectType: {type: String},
 }, baseOptions);
 
 const fileSchema = new Schema({
-    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId('6348acd2e1a47ca32e79f46f')},
+    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID)},
     title: { type: String, defualt: "none"},
-    parentId: {type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId('6348acd2e1a47ca32e79f46f')},
+    parentId: {type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID)},
     objectType: {type: String},
     fileMeta:{type: String},
 }, baseOptions);

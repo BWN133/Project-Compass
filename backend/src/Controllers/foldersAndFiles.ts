@@ -1,9 +1,10 @@
 import * as FFModel from "../models/folderAndFiles";
-import { RequestHandler } from "express";
+import { NextFunction, RequestHandler } from "express";
 import createHttpError from "http-errors";
 import mongoose, {Schema} from "mongoose";
 import { assertIsDefined } from "../util/assertIsDefined";
 import multer from "multer";
+import env from "../util/validateEnv";
 // TODO: Test create with postman
 
 export const fileType = ["img","txt"];
@@ -130,8 +131,34 @@ export const GetFile: RequestHandler = async(req, res, next) =>{
     }
 };
 
+
 export const GetFileFromParent:RequestHandler = async(req, res, next) => {
     const parentFieldId = req.params.parentFieldId;
+    try{
+        if(!mongoose.isValidObjectId(parentFieldId)){
+            throw createHttpError(400, "Invalid file id");
+        }
+        const result = await GetFileFromParentHelper(parentFieldId, next); 
+        res.status(200).json(result);
+    }catch(error){
+        next(error);
+    }
+}
+
+export const GetHomeFolder: RequestHandler= async(req, res, next) => {
+    const parentFieldId = env.DEFAULTPAGE_PARENTID;
+    try{
+        if(!mongoose.isValidObjectId(parentFieldId)){
+            throw createHttpError(400, "Invalid file id");
+        }
+        const result = await GetFileFromParentHelper(parentFieldId, next); 
+        res.status(200).json(result);
+    }catch(error){
+        next(error);
+    }
+}
+
+export const GetFileFromParentHelper = async(parentFieldId:string, next:NextFunction) => {
     try{
         if(!mongoose.isValidObjectId(parentFieldId)){
             throw createHttpError(400, "Invalid file id");
@@ -146,7 +173,7 @@ export const GetFileFromParent:RequestHandler = async(req, res, next) => {
                 result.push(fileResult);
             }
         }
-        res.status(200).json(result);
+        return result;
     }catch(error){
         next(error);
     }

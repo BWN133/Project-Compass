@@ -32,32 +32,6 @@ app.use(session({
 app.use("/api/users", userRouters);
 
 
-// TODO: File object upload
-// TODO: User upload 
-// TODO: Mission 
-
-// app.get("/", async (req, res) => {
-//     const folder = new FFModel.FolderModel({
-//         title: "test saved 1",
-//     });
-
-//     folder.save((err, savedOrder) => {
-//         console.log(JSON.stringify(savedOrder));
-//     });
-//     console.log(process.cwd());
-
-//     const img = fs.readFileSync('./img1.jpeg');
-//     // const encode_image = img.toString('base64');
-//     const file = new FFModel.FileModel({
-//         title: "test saved img 1",
-//         fileType: "Img",
-//         fileContent: img,
-//     });
-//     file.save((err, savedOrder) => {
-//         console.log(JSON.stringify(savedOrder));
-//     });
-// });
-
 
 
 app.use("/api/FF", FFRoutes);
