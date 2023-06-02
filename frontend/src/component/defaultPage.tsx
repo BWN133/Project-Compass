@@ -7,19 +7,8 @@ import stylesUtil from "../style/utils.module.css";
 import {Card}from "react-bootstrap";
 import {FF as FFModel} from "../models/data";
 
-interface pageProps {
-    setDepth: (input:number) => void,
-    depth: number,
-}
-export interface stateProps{
-    parentId: string,
-    grandParentId: string,
-}
 
-export interface FFDataProps{
-    FFData: FFModel[],
-    previousDepthBeforeUpdating: number,
-}
+
 
 const DefaultPage = ({setDepth, depth}: pageProps) => {
     console.log("page depth", depth);
@@ -38,7 +27,7 @@ const DefaultPage = ({setDepth, depth}: pageProps) => {
     useEffect(() => {
         async function loadNotes() {
             try {
-                const inputParentId = FFDataModel.previousDepthBeforeUpdating <= depth ? state.parentId : state.grandParentId;
+                const inputParentId = FFDataModel.previousDepthBeforeUpdating < depth ? state.parentId : state.grandParentId;
                 console.log("page inputParentId", inputParentId, "with previousDepth",FFDataModel.previousDepthBeforeUpdating, "and current depth", depth);
                 const Folders = await dataApi.fecthFolderFromParentId(inputParentId);
                 setDataModel({

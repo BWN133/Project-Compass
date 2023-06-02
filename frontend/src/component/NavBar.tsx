@@ -2,11 +2,11 @@ import { Container, Nav, Navbar } from "react-bootstrap";
 import {IoArrowBackSharp} from "react-icons/io5";
 
 interface navBarProps{
-    setDepth: (depthInput: number) => void,
-    depth: number
+    parentId: string,
+    parentIdSetter: (newParentId:string) => void,
 }
 
-const NavBar = ({setDepth, depth}: navBarProps) => {
+const NavBar = ({parentId, parentIdSetter}: navBarProps) => {
     return (
         <Navbar bg="primary" variant="dark" expand="sm" sticky="top">
             <Container>

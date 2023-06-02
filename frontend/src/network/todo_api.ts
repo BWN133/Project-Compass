@@ -28,3 +28,8 @@ export async function fecthFolderFromParentId(parentId: string): Promise<FFModel
     const response = await fetchData("http://localhost:5000/api/FF/Folder/" + parentId , { method: "GET" });
     return response.json();
 }
+
+export async function fecthGrandparentFolderFromParentId(parentId: string): Promise<FFModel[]> {
+    const response = await fetchData("http://localhost:5000/api/FF/FolderG/" + parentId , { method: "GET" });
+    return response.json();
+}

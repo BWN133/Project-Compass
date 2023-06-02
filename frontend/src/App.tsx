@@ -6,23 +6,28 @@ import DefaultPage from './component/DefaultPage';
 import NavBar from "./component/NavBar";
 import styles from "./style/NotesPage.module.css";
 import stylesUtil from "./style/utils.module.css";
-
+import { Route, Routes } from 'react-router';
+import { BrowserRouter } from 'react-router-dom';
 
 
 function App() {
-  const [depth, setDepth] = useState<number>(0);
-  console.log(depth);
+  const [parentId, parentIdSetter] = useState('6348acd2e1a47ca32e79f46f');
   return (
-  <Container>  
+  <BrowserRouter>  
     <NavBar 
-    setDepth={setDepth}
-    depth={depth}
+    
     />
-    <DefaultPage
-    setDepth={setDepth}
-    depth={depth}
-    />
-  </Container>
+    <Routes>
+      <Route 
+        path='/'
+        element={ <DefaultPage />}
+      />
+
+
+    </Routes>
+
+    
+  </BrowserRouter>
 
   );
 }

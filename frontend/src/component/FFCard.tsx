@@ -18,6 +18,7 @@ const FFCard = ({FFContent, onclicked,className}:FFCardProps) => {
         createdAt,
         updatedAt,
     } = FFContent;
+    
     return (
     <Card
         className={`${styles.noteCard}`}

@@ -95,6 +95,35 @@ export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknow
 };
 
 
+export const getParentFolder: RequestHandler= async(req, res, next) => {
+    const parentFieldId = env.DEFAULTPAGE_PARENTID;
+    try{
+        if(!mongoose.isValidObjectId(parentFieldId)){
+            throw createHttpError(400, "Invalid file id");
+        }
+        const result = await GetFileFromParentHelper(parentFieldId, next); 
+        res.status(200).json(result);
+    }catch(error){
+        next(error);
+    }
+}
+
+export const GetGrandParentFolder: RequestHandler= async(req, res, next) => {
+    const folderId = req.params.parentFieldId;
+    try{
+        if(!mongoose.isValidObjectId(folderId)){
+            throw createHttpError(400, "Invalid file id");
+        }
+        const currentFolderMeta = await FFModel.FolderModel.findById(folderId);
+        if(!currentFolderMeta){
+            throw createHttpError(400, "Parent Folder Does not Exist");
+        }
+        const result = await GetFileFromParentHelper(currentFolderMeta.parentId.toString(), next); 
+        res.status(200).json(result);
+    }catch(error){
+        next(error);
+    }
+}
 
 //TODO: take in file object, return file Data
 const getFileHelper = async(file: FFModel.File) => {
