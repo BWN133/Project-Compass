@@ -17,10 +17,8 @@ interface CreateFolderBody{
 
 export const createFolder: RequestHandler<unknown, unknown, CreateFolderBody, unknown>  = async(req, res, next) => {
     //TODO:  Authentication
-    console.log(req.body.title);
     const title = req.body.title;
     const parentId = req.body.parentId;
-    
     try{
         if (!title) {
             throw createHttpError(400, "Folder must have a title");
@@ -80,7 +78,6 @@ export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknow
             throw createHttpError(400, "Please provide a file and filetype");
         }
         const title = req.file.originalname;
-        console.log(req.file.filename);
         const foldersAndFiles = await FFModel.FileModel.create({
             userId: undefined ,
             title: title,
@@ -180,6 +177,7 @@ export const GetHomeFolder: RequestHandler= async(req, res, next) => {
         if(!mongoose.isValidObjectId(parentFieldId)){
             throw createHttpError(400, "Invalid file id");
         }
+
         const result = await GetFileFromParentHelper(parentFieldId, next); 
         res.status(200).json(result);
     }catch(error){
@@ -194,7 +192,9 @@ export const GetFileFromParentHelper = async(parentFieldId:string, next:NextFunc
         }
         const subFileCursor = await FFModel.BaseModel.find({parentId: parentFieldId}).cursor();
         const result = [];
+        await subFileCursor.next();
         for (let document = await subFileCursor.next(); document != null; document = await subFileCursor.next()){
+
             if(document.objectType == 'FOLDER'){
                 result.push(document);
             }else{
@@ -202,7 +202,9 @@ export const GetFileFromParentHelper = async(parentFieldId:string, next:NextFunc
                 result.push(fileResult);
             }
         }
+
         return result;
+        return {};
     }catch(error){
         next(error);
     }
