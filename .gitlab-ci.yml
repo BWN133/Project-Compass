@@ -23,7 +23,5 @@ test:
   dependencies:
     - npm
   script:
+    - cd backend
     - npm test
-  artifacts:
-    paths:
-      - backend/
