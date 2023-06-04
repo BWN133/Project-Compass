@@ -106,4 +106,5 @@
   "ts-node": {
     "files": true
   }
+  // "include": ["backend/src/*", "src/jest.config.ts"]
 }
