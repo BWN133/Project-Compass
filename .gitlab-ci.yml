@@ -7,7 +7,11 @@ stages:
 npm:
   stage: npm
   script:
-    - npm config set registry ${CI_NPM_REGISTRY}
+    - npm install
+    - cd backend
+    - npm install
+    - cd ..
+    - cd frontend
     - npm install
   cache:
     paths:
