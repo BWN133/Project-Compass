@@ -10,6 +10,7 @@ npm:
     - npm install
     - cd backend
     - npm install --legacy-peer-deps
+    - npm i ts-node -D
     - cd ..
     - cd frontend
     - npm install --legacy-peer-deps
