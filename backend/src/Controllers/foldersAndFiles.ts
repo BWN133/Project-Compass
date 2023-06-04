@@ -17,7 +17,6 @@ interface CreateFolderBody{
 
 export const createFolder: RequestHandler<unknown, unknown, CreateFolderBody, unknown>  = async(req, res, next) => {
     //TODO:  Authentication
-    console.log(req.body.title);
     const title = req.body.title;
     const parentId = req.body.parentId;
     try{
