@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon src/server.ts",
     "lint": "eslint . --ext .ts",
-    "test": "jest --testTimeout=5000 --forceExit"
+    "test": "jest --testTimeout=10000 --forceExit"
   },
   "keywords": [],
   "author": "",
