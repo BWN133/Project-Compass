@@ -14,8 +14,6 @@ describe("test create folder", ()=> {
     });
     expect(response.statusCode).toBe(201);
   });
-
-  
 })
 
 

@@ -22,5 +22,7 @@ test:
   stage: test
   dependencies:
     - npm
+  paths:
+    - backend/
   script:
     - npm test
