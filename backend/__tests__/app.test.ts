@@ -2,7 +2,6 @@ import supertest , { Request} from "supertest";
 import app from "../src/app";
 import express from "express";
 import {connect, disconnect} from "../__helper__/mongodb.memory.test.helper";
-import mongoose from "mongoose";
 
 beforeAll(connect);
 
