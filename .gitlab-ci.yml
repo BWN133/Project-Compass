@@ -1,5 +1,11 @@
 image: node:latest
 
+cache:
+    paths:
+      - node_modules/
+      - backend/node_modules
+      - frontend/node_modules    
+
 stages:
   - npm
   - test
@@ -9,25 +15,14 @@ npm:
   script:
     - npm install
     - cd backend
-    - pwd
     - npm install --legacy-peer-deps
     - npm i ts-node -D --legacy-peer-deps
     - cd ..
     - cd frontend
     - npm install --legacy-peer-deps
-  cache:
-    paths:
-      - node_modules/
-  artifacts:
-    expire_in: 1 days
-    when: on_success
-    paths:
-      - node_modules/
 
 test:
   stage: test
-  dependencies:
-    - npm
   script:
     - cd backend
     - npm test
