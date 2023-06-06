@@ -9,6 +9,7 @@ npm:
   script:
     - npm install
     - cd backend
+    - pwd
     - npm install --legacy-peer-deps
     - npm i ts-node -D --legacy-peer-deps
     - cd ..
