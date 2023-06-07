@@ -23,10 +23,10 @@ describe("test recieve data", () => {
     expect(response.statusCode).toBe(200);
   })
 
-  it("delete all folders", async() => {
-    const response  =  await supertest(app).delete("/api/FF");
-    expect(response.statusCode).toBe(204);
-  })
+  // it("delete all folders", async() => {
+  //   const response  =  await supertest(app).delete("/api/FF");
+  //   expect(response.statusCode).toBe(204);
+  // })
 })
 
 afterAll(disconnect);

@@ -192,7 +192,6 @@ export const GetFileFromParentHelper = async(parentFieldId:string, next:NextFunc
         }
         const subFileCursor = await FFModel.BaseModel.find({parentId: parentFieldId}).cursor();
         const result = [];
-        await subFileCursor.next();
         for (let document = await subFileCursor.next(); document != null; document = await subFileCursor.next()){
 
             if(document.objectType == 'FOLDER'){
