@@ -13,8 +13,6 @@ app.use(morgan('dev'));
 
 app.use(express.json());
 
-
-
 app.use(session({
     secret: env.SESSION_SECRET,
     resave: false,
