@@ -1,4 +1,10 @@
-image: node:8.9.4
+image: node:latest
+
+cache:
+    paths:
+      - node_modules/
+      - backend/node_modules
+      - frontend/node_modules    
 
 stages:
   - npm
@@ -7,20 +13,16 @@ stages:
 npm:
   stage: npm
   script:
-    - npm config set registry ${CI_NPM_REGISTRY}
     - npm install
-  cache:
-    paths:
-      - node_modules/
-  artifacts:
-    expire_in: 1 days
-    when: on_success
-    paths:
-      - node_modules/
+    - cd backend
+    - npm install --legacy-peer-deps
+    - npm i ts-node -D --legacy-peer-deps
+    - cd ..
+    - cd frontend
+    - npm install --legacy-peer-deps
 
 test:
   stage: test
-  dependencies:
-    - npm
   script:
+    - cd backend
     - npm test
