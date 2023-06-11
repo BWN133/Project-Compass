@@ -1,7 +1,9 @@
 import {FF as FFModel} from "../models/data";
 import { ConflictError, UnauthorizedError } from "../errors/http_errors";
-async function fetchData(input: RequestInfo, init?: RequestInit) {
-    console.log("input: " + input);
+
+
+async function fetchDataWrapper(input: RequestInfo, init?: RequestInit) {
+    console.log(input);
     const response = await fetch(input, init);
     if (response.ok) {
         return response;
@@ -20,18 +22,32 @@ async function fetchData(input: RequestInfo, init?: RequestInit) {
 
 
 export async function fetchFolder(): Promise<FFModel[]> {
-    const response = await fetchData("http://localhost:8000/api/FF", { method: "GET" });
+    const response = await fetchDataWrapper("http://localhost:5000/api/FF", { method: "GET" });
     return response.json();
 }
 
 export async function fecthFolderFromParentId(parentId: string): Promise<FFModel[]> {
-    const response = await fetchData("http://localhost:8000/api/FF/Folder/" + parentId , { method: "GET"});
+    const response = await fetchDataWrapper("http://localhost:5000/api/FF/Folder/" + parentId , { method: "GET" });
     return response.json();
 }
+
 
 export async function fecthGrandparentFolderFromParentId(parentId: string): Promise<FFModel[]> {
-    const response = await fetchData("http://localhost:8000/api/FF/FolderG/" + parentId , { method: "GET"});
+    const response = await fetchDataWrapper("http://localhost:5000/api/FF/FolderG/" + parentId , { method: "GET" });
     return response.json();
 }
 
 
+export async function uploadData(inputContent: Buffer, inputTitle: string, inputParentId: string, inputFileType: string){
+    const inputData = {
+        title: inputTitle,
+        fileContent: inputContent,
+        parentId: inputParentId,
+    }
+    const response = await fetchDataWrapper("http://localhost:5000/api/FF/" + inputFileType, 
+        {method: "POST", 
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(inputData),
+        });
+    return response.json();
+}

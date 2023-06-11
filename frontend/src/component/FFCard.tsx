@@ -13,12 +13,16 @@ interface FFCardProps {
 
 const FFCard = ({FFContent, onclicked,className}:FFCardProps) => {
     const {
-        title,
-        parentId,
-        createdAt,
-        updatedAt,
+      _id,
+      title,
+      fileContent,
+      createdAt,
+      updatedAt,
+      parentId,
+      objectType,
+      __type,
     } = FFContent;
-    
+    console.log("FFCard recieved constant with data: title: ", title, " \n objectType", objectType, "fileContent: ", fileContent, "\n updated at: ", updatedAt);
     return (
     <Card
         className={`${styles.noteCard}`}
@@ -27,7 +31,7 @@ const FFCard = ({FFContent, onclicked,className}:FFCardProps) => {
           <Card.Body className={styles.cardBody}>
           <AiFillFolder size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFolder>
           <Card.Title className={styleUtils.flexCenter}>
-            {title}
+            {FFContent.title}
           </Card.Title>
           </Card.Body>
         </Card>)
