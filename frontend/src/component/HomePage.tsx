@@ -24,29 +24,32 @@ interface pageProps {
 }
 
 
-const DefaultPage = ({ inputParentId }: pageProps) => {
-    //'6348acd2e1a47ca32e79f46f'
+const HomePage = ({ inputParentId }: pageProps) => {
     const [parentId, stateParentId] = useState<string>(inputParentId);
     // const [parentId, stateParentId] = useState<string>("6348acd2e1a47ca32e79f46f");
     const navigate = useNavigate();
     const [FFDataModel, setDataModel] = useState<FFModel[]>([]);
-
-    //home
-    const [preParentId, savePreParentId] = useState<string>("");
+    const urlParams = new URLSearchParams(window.location.search);
 
     useEffect(() => {
         async function loadNotes() {
+            const id = urlParams.get('id');
+            console.log("id: " + id);
+            console.log("inputParentId " + inputParentId);
+            var newId = parentId;
             try {
-                const Folders = await dataApi.fecthFolderFromParentId(parentId)
-                console.log("parentId: " + parentId);
+                if (inputParentId === "toFolder" && id != null) {
+                   newId = id
+                }
+                const Folders = await dataApi.fecthFolderFromParentId(newId)
+                console.log("newId: " + newId);
                 setDataModel(Folders);
-                console.log("preParentId: " + preParentId);
             } catch (error) {
                 console.error(error);
             }
         }
         loadNotes();
-    }, [parentId]);
+    }, []);
 
     console.log("break point 00");
     const folderGrid =
@@ -56,7 +59,7 @@ const DefaultPage = ({ inputParentId }: pageProps) => {
                     <FFCard
                         FFContent={FF}
                         onclicked={(updatedParentId: string) => {
-                            stateParentId(updatedParentId);
+                            window.location.href = '/folder/?id=' + updatedParentId;
                             console.log("break point 01");
                         }}
                     />
@@ -70,13 +73,9 @@ const DefaultPage = ({ inputParentId }: pageProps) => {
                 <Button onClick={() => navigate(-1)}> Go Back </Button>
                 <Button onClick={() => navigate(1)}> Go Forward </Button>
             </div>
-            {FFDataModel && folderGrid}
-            <Link to="/page1">page1</Link>
- 
-
-           
+            {FFDataModel && folderGrid}                               
 
         </>);
 }
 
-export default DefaultPage;
+export default HomePage;
