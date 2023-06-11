@@ -20,7 +20,7 @@ const upload = multer({storage});
 
 router.get("/", FFController.GetHomeFolder);
 
-export default router;
+router.post("/folder", FFController.createFolder);
 
 router.post("/file", upload.single('fileContent'), FFController.createFile);
 
