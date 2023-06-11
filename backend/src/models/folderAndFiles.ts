@@ -26,16 +26,17 @@ const fileSchema = new Schema({
     fileMeta:{type: String},
 }, baseOptions);
 
-
+const fileMetaSchema = new Schema({filename:{type: String}}, {collection:'uploads.files'});
+const chunkSchema = new Schema({files_id:{type: Schema.Types.ObjectId}}, {collection:'uploads.chunks'});
 type Base = InferSchemaType<typeof folderSchema>;
 
 type File = InferSchemaType<typeof fileSchema>;
 
 const BaseModel = model<Base>('Base', folderSchema);
 //test connection with file chunk
-const uploadMetaModel = model('uploads_files', new Schema({},{collection:'uploads.files'}));
+const uploadMetaModel = model('uploads_files', fileMetaSchema);
 
-const chunkModel = model('uploads_chunks',new Schema({}, {collection: 'uploads.chunks'}));
+const chunkModel = model('uploads_chunks', chunkSchema);
 
 const FolderModel = BaseModel.discriminator<Base>('Folder', new Schema({}, baseOptions));
 

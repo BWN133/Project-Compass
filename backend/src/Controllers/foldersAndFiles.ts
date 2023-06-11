@@ -1,7 +1,7 @@
 import * as FFModel from "../models/folderAndFiles";
 import { NextFunction, RequestHandler } from "express";
 import createHttpError from "http-errors";
-import mongoose, {Schema} from "mongoose";
+import mongoose, {Schema, ObjectId} from "mongoose";
 import { assertIsDefined } from "../util/assertIsDefined";
 import multer from "multer";
 import env from "../util/validateEnv";
@@ -131,14 +131,14 @@ const getFileHelper = async(file: FFModel.File) => {
     if(!fileMeta){
         throw createHttpError(404, "File content missing");
     }
-    const fileContents = await FFModel.chunkModel.find({files_id : fileMeta[0].id}).sort("-postDate");
+    const fileMetaId = new mongoose.Types.ObjectId(fileMeta[0]._id);
+    const fileContents = await FFModel.chunkModel.find({files_id: fileMeta[0]._id});//.sort("-postDate")
     const resultFileData = {
-        'fileName':file.title,
-        fileContents
+        'title':file.title,
+        fileContents,
         };
     return resultFileData;
 }
-
 
 
 export const GetFile: RequestHandler = async(req, res, next) =>{
@@ -193,7 +193,6 @@ export const GetFileFromParentHelper = async(parentFieldId:string, next:NextFunc
         const subFileCursor = await FFModel.BaseModel.find({parentId: parentFieldId}).cursor();
         const result = [];
         for (let document = await subFileCursor.next(); document != null; document = await subFileCursor.next()){
-
             if(document.objectType == 'FOLDER'){
                 result.push(document);
             }else{

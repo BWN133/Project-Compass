@@ -16,6 +16,8 @@ const storage = new GridFsStorage({
       });
     }
   });
+
+  
 const upload = multer({storage});
 
 router.get("/", FFController.GetHomeFolder);
@@ -29,7 +31,6 @@ router.get("/folder/:parentFieldId",FFController.GetFileFromParent);
 router.get("/folderG/:parentFieldId", FFController.GetGrandParentFolder);
 
 router.get("/file/:fileId", FFController.GetFile);
-
 
 router.delete("/folder/:objectId", FFController.deleteFolder);
 

@@ -22,8 +22,6 @@ function App() {
         inputParentId='6348acd2e1a47ca32e79f46f'/>}
       />
     </Routes>
-
-    
   </BrowserRouter>
 
   );
