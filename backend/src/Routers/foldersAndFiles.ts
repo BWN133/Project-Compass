@@ -39,3 +39,5 @@ router.delete("/",  FFController.DeleteAll);
 
 
 export default router;
+
+export default router;
