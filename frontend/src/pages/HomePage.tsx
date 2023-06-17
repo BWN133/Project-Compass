@@ -1,52 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Container, Button, Col, Row, Spinner } from 'react-bootstrap';
 // import { Link, useNavigate, useRouteMatch} from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import * as dataApi from '../network/todo_api';
 import styles from "../style/NotesPage.module.css";
-import FFCard from './FFCard';
+import FFCard from '../component/FFCard';
 import stylesUtil from "../style/utils.module.css";
 import { Card } from "react-bootstrap";
 import { FF as FFModel } from "../models/data";
 // import NavBar from "../component/NavBar";
 import { HashRouter, BrowserRouter } from 'react-router-dom';
 import { Route, Routes } from 'react-router';
-import TestPage1 from '../pages/TestPage1';
+import TestPage1 from './TestPage1';
 // import TestPage2 from '../pages/TestPage2';
-import NotFoundPage from '../pages/NotFoundPage';
-import TestPage2 from '../pages/TestPage2';
+import NotFoundPage from './NotFoundPage';
+import TestPage2 from './TestPage2';
 
-
-
-
-interface pageProps {
-    inputParentId: string
-}
-
-
-const DefaultPage = ({ inputParentId }: pageProps) => {
-    //'6348acd2e1a47ca32e79f46f'
-    const [parentId, stateParentId] = useState<string>(inputParentId);
-    // const [parentId, stateParentId] = useState<string>("6348acd2e1a47ca32e79f46f");
+const HomePage = () => {
     const navigate = useNavigate();
     const [FFDataModel, setDataModel] = useState<FFModel[]>([]);
-
-    //home
-    const [preParentId, savePreParentId] = useState<string>("");
-
     useEffect(() => {
         async function loadNotes() {
+            const currentPath = window.location.pathname;
+            const segments = currentPath.split('/');
+            const parentId = segments.length == 2 ? "6348acd2e1a47ca32e79f46f":  segments[segments.length - 1];
+            console.log("current segment length:", segments.length);
             try {
-                const Folders = await dataApi.fecthFolderFromParentId(parentId)
-                console.log("parentId: " + parentId);
+                const Folders = await dataApi.fecthFolderFromParentId(parentId);
+                console.log("We tried to give value \n");
                 setDataModel(Folders);
-                console.log("preParentId: " + preParentId);
             } catch (error) {
                 console.error(error);
             }
         }
         loadNotes();
-    }, [parentId]);
+    }, [navigate]);
 
     console.log("break point 00");
     const folderGrid =
@@ -55,9 +43,9 @@ const DefaultPage = ({ inputParentId }: pageProps) => {
                 <Col key={FF._id}>
                     <FFCard
                         FFContent={FF}
-                        onclicked={(updatedParentId: string) => {
-                            stateParentId(updatedParentId);
-                            console.log("break point 01");
+                        onclicked={(updatedParentId: string, objecType: string) => {
+                            const url = `/folder/${updatedParentId}`;
+                            navigate(url);
                         }}
                     />
                 </Col>
@@ -67,16 +55,15 @@ const DefaultPage = ({ inputParentId }: pageProps) => {
     return (
         <>
             <div>
-                <Button onClick={() => navigate(-1)}> Go Back </Button>
-                <Button onClick={() => navigate(1)}> Go Forward </Button>
+                <Button onClick={() => {
+                    window.location.href = '/imgShow';
+                }}></Button>
+                <Button onClick={() => {navigate(-1);}}> Go Back </Button>
+                <Button onClick={() => {navigate(1);}}> Go Forward </Button>
             </div>
-            {FFDataModel && folderGrid}
-            <Link to="/page1">page1</Link>
- 
-
-           
+            {FFDataModel && folderGrid}                               
 
         </>);
 }
 
-export default DefaultPage;
+export default HomePage;

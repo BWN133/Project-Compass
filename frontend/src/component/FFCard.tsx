@@ -7,7 +7,7 @@ import {FF as FFModel} from "../models/data";
 
 interface FFCardProps {
     FFContent: FFModel,
-    onclicked: (ffInput: string) => void,
+    onclicked: (ffInput: string, objectType: string) => void,
     className?: string,
 }
 
@@ -22,11 +22,12 @@ const FFCard = ({FFContent, onclicked,className}:FFCardProps) => {
       objectType,
       __type,
     } = FFContent;
-    console.log("FFCard recieved constant with data: title: ", title, " \n objectType", objectType, "fileContent: ", fileContent, "\n updated at: ", updatedAt);
+    const strObjecType:string = objectType ? objectType: "FOLDER";
+   // console.log("FFCard recieved constant with data: title: ", title, " \n objectType", objectType, "fileContent: ", fileContent, "\n updated at: ", updatedAt);
     return (
     <Card
         className={`${styles.noteCard}`}
-        onClick={() => onclicked(FFContent._id)}
+        onClick={() => onclicked(FFContent._id, strObjecType)}
         >
           <Card.Body className={styles.cardBody}>
           <AiFillFolder size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFolder>

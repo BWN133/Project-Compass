@@ -31,6 +31,12 @@ export async function fecthFolderFromParentId(parentId: string): Promise<FFModel
     return response.json();
 }
 
+export async function fecthFileWithId(id: string): Promise<FFModel> {
+    const response = await fetchDataWrapper("http://localhost:5000/api/FF/File/" + id , { method: "GET" });
+    //console.log("In data api response.json look like:Te", response.json());
+    return response.json();
+}
+
 
 export async function fecthGrandparentFolderFromParentId(parentId: string): Promise<FFModel[]> {
     const response = await fetchDataWrapper("http://localhost:5000/api/FF/FolderG/" + parentId , { method: "GET" });
