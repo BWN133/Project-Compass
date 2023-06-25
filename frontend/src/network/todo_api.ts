@@ -57,10 +57,9 @@ export async function uploadData(inputTitle: string, inputParentId: string, inpu
     }
     const response = await fetchDataWrapper("http://localhost:5000/api/FF/" + inputFileType, 
         {method: "POST", 
-        mode: "no-cors",
+        //mode: "no-cors",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(inputData),
         });
-        console.log(response.json());
     return response.json();
 }
