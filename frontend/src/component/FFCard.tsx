@@ -1,7 +1,7 @@
 import {AiFillFolder}from "react-icons/ai";
-import styles from "../style/Note.module.css";
-import notesStyle from "../style/NotesPage.module.css";
+//import styles from "../style/Note.module.css";
 import styleUtils from "../style/utils.module.css";
+import styles from "../style/FFCard.module.css";
 import {Card}from "react-bootstrap";
 import {FF as FFModel} from "../models/data";
 

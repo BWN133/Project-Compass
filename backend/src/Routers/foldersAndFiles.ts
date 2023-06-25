@@ -17,7 +17,7 @@ const storage = new GridFsStorage({
     }
   });
 
-  
+
 const upload = multer({storage});
 
 router.get("/", FFController.GetHomeFolder);
@@ -37,7 +37,5 @@ router.delete("/folder/:objectId", FFController.deleteFolder);
 router.delete("/",  FFController.DeleteAll);
 
 
-
-export default router;
 
 export default router;

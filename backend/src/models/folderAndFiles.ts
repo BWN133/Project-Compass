@@ -27,7 +27,15 @@ const fileSchema = new Schema({
 }, baseOptions);
 
 const fileMetaSchema = new Schema({filename:{type: String}}, {collection:'uploads.files'});
-const chunkSchema = new Schema({files_id:{type: Schema.Types.ObjectId}}, {collection:'uploads.chunks'});
+const chunkSchema = new Schema({
+    files_id:{type: Schema.Types.ObjectId},
+    _id: {type: Schema.Types.ObjectId},
+    n: {type: Number},
+    data: {
+        data: Buffer,
+        contentType: String,
+    },
+}, {collection:'uploads.chunks'});
 type Base = InferSchemaType<typeof folderSchema>;
 
 type File = InferSchemaType<typeof fileSchema>;

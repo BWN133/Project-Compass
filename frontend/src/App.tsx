@@ -49,14 +49,9 @@ function App() {
           />
 
           <Route
-          path='/imgShow'
-          element={<ShowImgPage 
-            imgId= '648544595881f1dde0969306'
-          />}
-          >
-
-
-          </Route>
+          path='/imgShow/*'
+          element={<ShowImgPage/>}
+          />
 
         </Routes>
       </Container>

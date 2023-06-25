@@ -19,6 +19,8 @@ export const createFolder: RequestHandler<unknown, unknown, CreateFolderBody, un
     //TODO:  Authentication
     const title = req.body.title;
     const parentId = req.body.parentId;
+    console.log("Here is title recieved: ", title);
+    console.log("here is parentId recieved;",  parentId);
     try{
         if (!title) {
             throw createHttpError(400, "Folder must have a title");
@@ -29,6 +31,7 @@ export const createFolder: RequestHandler<unknown, unknown, CreateFolderBody, un
             parentId: parentId,
             objectType: "FOLDER",
         });
+        
         res.status(201).json(foldersAndFiles);
     }catch(error){
         next(error);
@@ -123,19 +126,26 @@ export const GetGrandParentFolder: RequestHandler= async(req, res, next) => {
 }
 
 //TODO: take in file object, return file Data
-const getFileHelper = async(file: FFModel.File) => {
+const getFileHelper = async(file: FFModel.File, id: string) => {
     if(!file){
         throw  createHttpError(404, "File not found");
     }
+    
     const fileMeta = await FFModel.uploadMetaModel.find({filename:file.fileMeta});
     if(!fileMeta){
         throw createHttpError(404, "File content missing");
     }
-    const fileMetaId = new mongoose.Types.ObjectId(fileMeta[0]._id);
     const fileContents = await FFModel.chunkModel.find({files_id: fileMeta[0]._id});//.sort("-postDate")
+    if(!fileContents[0].data)
+    {
+        throw createHttpError(404, "File data missing in Chunk");
+    }
     const resultFileData = {
-        'title':file.title,
-        fileContents,
+        _id: id,
+        parentId: file.parentId,
+        objectType: file.objectType,
+        title:file.title,
+        fileContent: fileContents[0].data,
         };
     return resultFileData;
 }
@@ -148,9 +158,9 @@ export const GetFile: RequestHandler = async(req, res, next) =>{
         if(!mongoose.isValidObjectId(fileId)){
             throw createHttpError(400, "Invalid file id");
         }
-        const file = await FFModel.FileModel.findById(fileId).exec();
+        const file = await FFModel.FileModel.findById(fileId);
 
-        const resultFileData = await getFileHelper(<FFModel.File>file);
+        const resultFileData = await getFileHelper(<FFModel.File>file, fileId);
         res.status(200).json(resultFileData);
     }catch(error){
         next(error);
@@ -196,7 +206,7 @@ export const GetFileFromParentHelper = async(parentFieldId:string, next:NextFunc
             if(document.objectType == 'FOLDER'){
                 result.push(document);
             }else{
-                const fileResult = await getFileHelper(<FFModel.File> document);
+                const fileResult = await getFileHelper(<FFModel.File> document, document.id);
                 result.push(fileResult);
             }
         }

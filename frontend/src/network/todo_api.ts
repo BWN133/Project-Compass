@@ -20,6 +20,11 @@ async function fetchDataWrapper(input: RequestInfo, init?: RequestInit) {
     }
 }
 
+export interface FolderInput{
+    title: string,
+    fileContent?: Buffer,
+    parentId: string 
+}
 
 export async function fetchFolder(): Promise<FFModel[]> {
     const response = await fetchDataWrapper("http://localhost:5000/api/FF", { method: "GET" });
@@ -44,7 +49,7 @@ export async function fecthGrandparentFolderFromParentId(parentId: string): Prom
 }
 
 
-export async function uploadData(inputContent: Buffer, inputTitle: string, inputParentId: string, inputFileType: string){
+export async function uploadData(inputTitle: string, inputParentId: string, inputFileType: string, inputContent?: Buffer): Promise<FFModel>{
     const inputData = {
         title: inputTitle,
         fileContent: inputContent,
@@ -52,8 +57,10 @@ export async function uploadData(inputContent: Buffer, inputTitle: string, input
     }
     const response = await fetchDataWrapper("http://localhost:5000/api/FF/" + inputFileType, 
         {method: "POST", 
+        mode: "no-cors",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(inputData),
         });
+        console.log(response.json());
     return response.json();
 }
