@@ -15,7 +15,7 @@ interface AddEditFFDialogProps {
 
 
 
-const AddEditNoteDialog = ({ FFToEdit, onDismiss, onFFSaved, mode, parentId}: AddEditFFDialogProps) => {
+const TempAddEditFileDialog = ({ FFToEdit, onDismiss, onFFSaved, mode, parentId}: AddEditFFDialogProps) => {
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<todoApi.FolderInput>({
         defaultValues: {
@@ -25,12 +25,13 @@ const AddEditNoteDialog = ({ FFToEdit, onDismiss, onFFSaved, mode, parentId}: Ad
 
     async function onSubmit(input: todoApi.FolderInput) {
         try {
-            if(mode === 'FOLDER')
+            if(mode === 'folder')
             {
                 const responseFF = await todoApi.uploadData(input.title, parentId, 'folder');
                 onFFSaved(responseFF);
             }else
             {
+                console.log(input.fileContent, "Recieved file content in addeidtfiledialog in onSubmit !!!!!!!!!!!!!");
                 if(!input.fileContent){
                     throw console.error();
                 }
@@ -43,37 +44,41 @@ const AddEditNoteDialog = ({ FFToEdit, onDismiss, onFFSaved, mode, parentId}: Ad
         }
     }
 
-    const fileInputField =  <TextInputField
-                                name="fileContent"
-                                label="File"
-                                type="file"
-                                placeholder="File"
-                                register={register}
-                                registerOptions={{ required: "Required" }}
-                                error={errors.title}/> 
-    const folderInputField =   <TextInputField
-    name="title"
-    label="Title"
-    type="text"
-    placeholder="Title"
-    register={register}
-    registerOptions={{ required: "Required" }}
-    error={errors.title}
-/>
+    const fileInputField = <div> successfully </ div>
     return (
         <Modal show onHide={onDismiss}>
             <Modal.Header closeButton>
                 <Modal.Title>
-                    {FFToEdit ? "Edit Note" : "Add Note"}
+                    {FFToEdit ? "Edit note" : "Add note"}
                 </Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
                 <Form id="addEditNoteForm" onSubmit={handleSubmit(onSubmit)}>
-                    {mode === 'FILE' && fileInputField}
-                    {mode === 'FOLDER' && folderInputField}
+                    <TextInputField
+                        name="title"
+                        label="Title"
+                        type="text"
+                        placeholder="Title"
+                        register={register}
+                        registerOptions={{ required: "Required" }}
+                        error={errors.title}
+                    />
+                    <TextInputField
+                        name="fileContent"
+                        label="File"
+                        type="file"
+                        placeholder="File"
+                        register={register}
+                        registerOptions={{ required: "Required" }}
+                        error={errors.title}
+                    />
+                    {
+                        mode == 'FILE' && fileInputField
+                    }
                 </Form>
             </Modal.Body>
+
             <Modal.Footer>
                 <Button
                     type="submit"
@@ -87,4 +92,4 @@ const AddEditNoteDialog = ({ FFToEdit, onDismiss, onFFSaved, mode, parentId}: Ad
     );
 }
 
-export default AddEditNoteDialog;
+export default TempAddEditFileDialog;

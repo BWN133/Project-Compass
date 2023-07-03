@@ -3,7 +3,6 @@ import { ConflictError, UnauthorizedError } from "../errors/http_errors";
 
 
 async function fetchDataWrapper(input: RequestInfo, init?: RequestInit) {
-    console.log(input);
     const response = await fetch(input, init);
     if (response.ok) {
         return response;
@@ -22,7 +21,7 @@ async function fetchDataWrapper(input: RequestInfo, init?: RequestInit) {
 
 export interface FolderInput{
     title: string,
-    fileContent?: Buffer,
+    fileContent?: string,
     parentId: string 
 }
 
@@ -49,17 +48,29 @@ export async function fecthGrandparentFolderFromParentId(parentId: string): Prom
 }
 
 
-export async function uploadData(inputTitle: string, inputParentId: string, inputFileType: string, inputContent?: Buffer): Promise<FFModel>{
+export async function uploadData(inputTitle: string, inputParentId: string, inputFileType: string, inputContent?: string): Promise<FFModel>{
     const inputData = {
         title: inputTitle,
-        fileContent: inputContent,
         parentId: inputParentId,
     }
-    const response = await fetchDataWrapper("http://localhost:5000/api/FF/" + inputFileType, 
+    let response = null;
+    if(inputFileType == 'folder')
+    {
+        response = await fetchDataWrapper("http://localhost:5000/api/FF/" + inputFileType, 
         {method: "POST", 
-        //mode: "no-cors",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(inputData),
         });
+    }else{
+        const image = inputContent? inputContent: "None \n";
+        const formData = new FormData();
+        formData.append('fileContent', image); 
+        formData.append('parentId', inputParentId);
+        response = await fetchDataWrapper("http://localhost:5000/api/FF/" + inputFileType, 
+        {method: "POST", 
+        body: formData,
+        });
+    }
     return response.json();
 }
+

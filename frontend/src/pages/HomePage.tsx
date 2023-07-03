@@ -9,6 +9,7 @@ import { FF as FFModel } from "../models/data";
 import ShowImgPage from './ShowImgPage';
 import {useNavigation} from '../network/Navigate';
 import AddEditNoteDialog from '../component/AddEditFFDialogBox';
+import TempAddEditFileDialog from '../component/TempAddFileDialog';
 
 interface DataModelOrImage{
     FFDataModel: FFModel[],
@@ -22,6 +23,7 @@ const HomePage = () => {
         displayImage: false,
     });
     const [showAddDialog, setShowAddDialog] = useState(false);
+    const [showAddFileDialog, setShowAddFileDialog] = useState(false);
     const currentParentId = useRef("6348acd2e1a47ca32e79f46f");
 
     useEffect(() => {
@@ -78,6 +80,7 @@ const HomePage = () => {
                 {/* <Button onClick={() => {navigate(1);}}> Go Forward </Button> */}
             </div>
             <Button onClick={() => setShowAddDialog(true)}> Add Folder </Button>
+            <Button onClick={() => setShowAddFileDialog(true)}> Add File </Button>
             {showAddDialog && <AddEditNoteDialog
             onDismiss={() => setShowAddDialog(false)}
             onFFSaved = {(newFFModel) => {
@@ -87,7 +90,19 @@ const HomePage = () => {
                 })
                 setShowAddDialog(false)
             }}
-            mode='folder'
+            mode='FOLDER'
+            parentId={currentParentId.current}
+            />}
+            {showAddFileDialog && <AddEditNoteDialog
+            onDismiss={() => setShowAddFileDialog(false)}
+            onFFSaved = {(newFFModel) => {
+                setDataModel({
+                    FFDataModel: [...DataModel.FFDataModel, newFFModel],
+                    displayImage: DataModel.displayImage
+                })
+                setShowAddFileDialog(false)
+            }}
+            mode='FILE'
             parentId={currentParentId.current}
             />}
             {!DataModel.displayImage && DataModel.FFDataModel && folderGrid}  
