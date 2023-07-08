@@ -16,6 +16,11 @@ interface DataModelOrImage{
     displayImage: boolean,
 }
 
+interface FFSelected{
+    FFId: string,
+    Selected: boolean
+}
+
 const HomePage = () => {
     const { navigate} = useNavigation();
     const [DataModel, setDataModel] = useState<DataModelOrImage>({
@@ -24,17 +29,21 @@ const HomePage = () => {
     });
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [showAddFileDialog, setShowAddFileDialog] = useState(false);
+    const [showDeleteFF, setShowDeleteFF] = useState(false);
     const currentParentId = useRef("6348acd2e1a47ca32e79f46f");
+    const foldersAndFilesToDelete = useRef<{[FFID:string]: boolean}>({});
 
     useEffect(() => {
         async function loadNotes() {
+            
             const currentPath = window.location.pathname;
             const segments = currentPath.split('/');
-            const parentId = segments.length == 2 ? "6348acd2e1a47ca32e79f46f" : segments[segments.length - 1];
+            const parentId = segments.length === 2 ? "6348acd2e1a47ca32e79f46f" : segments[segments.length - 1];
             currentParentId.current = parentId;
+            foldersAndFilesToDelete.current = {};
             console.log("current segment length:", segments.length);
             try {
-                if(segments.length == 2 || segments[segments.length - 2] == 'folder')
+                if(segments.length === 2 || segments[segments.length - 2] === 'folder')
                 {
                     const Folders = await dataApi.fecthFolderFromParentId(parentId);
                     setDataModel({
@@ -55,6 +64,34 @@ const HomePage = () => {
         loadNotes();
     }, [navigate]);
 
+    async function onDeleteClicked(){
+        let newDataModel:FFModel[] = [];
+        for(let index = 0; index < DataModel.FFDataModel.length; index++){
+            console.log("break point in onDeleteClicked with Index: ", index);
+            const currentFFDataModel = DataModel.FFDataModel[index];
+            console.log("break point in onDeleteClicked successfully got datamodel info ", index);
+            const currentId:string = currentFFDataModel._id;
+            
+            if(foldersAndFilesToDelete.current[currentId])
+            {
+                await dataApi.deleteDataFromId(currentId);
+            }else
+            {
+                newDataModel.push(currentFFDataModel);
+            }
+            console.log("break point in onDeleteClicked successfully finished operation ", index);
+        }
+        console.log("break point in ondelecClicked finsied for loop");
+        setDataModel({
+            FFDataModel: newDataModel,
+            displayImage: DataModel.displayImage,
+        });
+        console.log("break point in ondelecClicked finsied setDataModel");
+        foldersAndFilesToDelete.current = {};
+        console.log("break point in ondelecClicked finished clean up");
+        setShowDeleteFF(false);
+    }
+
     console.log("break point 00");
     const folderGrid =
         <Row xs={1} md={2} xl={3} className={`g-4 ${styles.notesGrid}`} style={{ marginTop: "20px" }}>
@@ -64,14 +101,17 @@ const HomePage = () => {
                         FFContent={FF}
                         onclicked={(updatedParentId: string, objectType: string) => {
                             console.log("Objecttype recieved is: ", objectType);
-                            if(objectType == 'FOLDER') navigate(`/folder/${updatedParentId}`);
+                            if(objectType === 'FOLDER') navigate(`/folder/${updatedParentId}`);
                             else navigate(`/imgShow/${updatedParentId}`);  
+                        }}
+                        showCheckMark={showDeleteFF}
+                        handleCheckboxClick = {(deletefile: string, isChecked: boolean) => {
+                            foldersAndFilesToDelete.current[deletefile] = isChecked;
                         }}
                     />
                 </Col>
             ))}
         </Row>
-
     return (
         <>
             <div>
@@ -81,6 +121,8 @@ const HomePage = () => {
             </div>
             <Button onClick={() => setShowAddDialog(true)}> Add Folder </Button>
             <Button onClick={() => setShowAddFileDialog(true)}> Add File </Button>
+            <Button onClick={() => setShowDeleteFF(!showDeleteFF)}> SelectFile </ Button>
+            <Button onClick={() => {onDeleteClicked()}}> Delete </ Button>
             {showAddDialog && <AddEditNoteDialog
             onDismiss={() => setShowAddDialog(false)}
             onFFSaved = {(newFFModel) => {

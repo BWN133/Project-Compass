@@ -47,6 +47,19 @@ export async function fecthGrandparentFolderFromParentId(parentId: string): Prom
     return response.json();
 }
 
+export async function deleteDataFromId(targetId: string): Promise<number>{
+    console.log("In Frontend TODO Api we recieved ID for delete: ",targetId);
+    const DeleteFolderBody = {objectId: targetId}
+    const response = await fetchDataWrapper("http://localhost:5000/api/FF/folder",
+    {
+        method:"DELETE",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(DeleteFolderBody),
+    });
+    console.log("In Frontend TODO Api successfully delete: ",targetId);
+    return response.status;
+}
+
 
 export async function uploadData(inputTitle: string, inputParentId: string, inputFileType: string, inputContent?: string): Promise<FFModel>{
     const inputData = {
@@ -54,7 +67,7 @@ export async function uploadData(inputTitle: string, inputParentId: string, inpu
         parentId: inputParentId,
     }
     let response = null;
-    if(inputFileType == 'folder')
+    if(inputFileType === 'folder')
     {
         response = await fetchDataWrapper("http://localhost:5000/api/FF/" + inputFileType, 
         {method: "POST", 
