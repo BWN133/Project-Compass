@@ -19,6 +19,8 @@ export const createFolder: RequestHandler<unknown, unknown, CreateFolderBody, un
     //TODO:  Authentication
     const title = req.body.title;
     const parentId = req.body.parentId;
+    console.log("Here is title recieved: ", title);
+    console.log("here is parentId recieved;",  parentId);
     try{
         if (!title) {
             throw createHttpError(400, "Folder must have a title");
@@ -29,6 +31,7 @@ export const createFolder: RequestHandler<unknown, unknown, CreateFolderBody, un
             parentId: parentId,
             objectType: "FOLDER",
         });
+        
         res.status(201).json(foldersAndFiles);
     }catch(error){
         next(error);
@@ -123,19 +126,26 @@ export const GetGrandParentFolder: RequestHandler= async(req, res, next) => {
 }
 
 //TODO: take in file object, return file Data
-const getFileHelper = async(file: FFModel.File) => {
+const getFileHelper = async(file: FFModel.File, id: string) => {
     if(!file){
         throw  createHttpError(404, "File not found");
     }
+    
     const fileMeta = await FFModel.uploadMetaModel.find({filename:file.fileMeta});
     if(!fileMeta){
         throw createHttpError(404, "File content missing");
     }
-    const fileMetaId = new mongoose.Types.ObjectId(fileMeta[0]._id);
     const fileContents = await FFModel.chunkModel.find({files_id: fileMeta[0]._id});//.sort("-postDate")
+    if(!fileContents[0].data)
+    {
+        throw createHttpError(404, "File data missing in Chunk");
+    }
     const resultFileData = {
-        'title':file.title,
-        fileContents,
+        _id: id,
+        parentId: file.parentId,
+        objectType: file.objectType,
+        title:file.title,
+        fileContent: fileContents[0].data,
         };
     return resultFileData;
 }
@@ -148,9 +158,9 @@ export const GetFile: RequestHandler = async(req, res, next) =>{
         if(!mongoose.isValidObjectId(fileId)){
             throw createHttpError(400, "Invalid file id");
         }
-        const file = await FFModel.FileModel.findById(fileId).exec();
+        const file = await FFModel.FileModel.findById(fileId);
 
-        const resultFileData = await getFileHelper(<FFModel.File>file);
+        const resultFileData = await getFileHelper(<FFModel.File>file, fileId);
         res.status(200).json(resultFileData);
     }catch(error){
         next(error);
@@ -196,7 +206,7 @@ export const GetFileFromParentHelper = async(parentFieldId:string, next:NextFunc
             if(document.objectType == 'FOLDER'){
                 result.push(document);
             }else{
-                const fileResult = await getFileHelper(<FFModel.File> document);
+                const fileResult = await getFileHelper(<FFModel.File> document, document.id);
                 result.push(fileResult);
             }
         }
@@ -224,37 +234,57 @@ const deleteFileHelper = async(file: FFModel.File) =>{
     return
 };
 
-/* TODO: Delete File 
-    1. Have an edge case that if the file itself is a file not a folder, chunk and file data won't be delted 
-    2. Need to switch helper function a bit.
-*/
-export const deleteFolder: RequestHandler = async(req, res, next) =>{
+
+
+
+
+interface DeleteFolderBody{
+    objectId: string
+}
+
+export const deleteFolder: RequestHandler<unknown, unknown, DeleteFolderBody, unknown> = async(req, res, next) =>{
     // TODO: Authentication
-    const objectID = req.params.objectId;
+    const objectID = req.body.objectId;
+    console.log(objectID);
     try{
         if(!mongoose.isValidObjectId(objectID)){
             throw createHttpError(400, "Invalid note id");
         }
-        const object = FFModel.FolderModel.findById(objectID);
+        const object = await FFModel.BaseModel.findById(objectID);
         if(!object){
             throw createHttpError(404, "Note not found");
         }
-        await object.remove();
-
-        const subFoldersAndFilesCursor = await FFModel.BaseModel.find({parentId: objectID}).cursor();
-        for (let document = await subFoldersAndFilesCursor.next(); document != null; document = await subFoldersAndFilesCursor.next()){
-            if(document.objectType == 'FOLDER'){
-                document.remove();
-            }else{
-                deleteFileHelper(<FFModel.File>document);
-            }
+        if(object.objectType == 'FILE')
+        {
+            await deleteFileHelper(<FFModel.File>object);
+        }else
+        {
+            await deleteFolderContent(objectID);
         }
+        await object.remove();
         res.sendStatus(204);
     }catch(error){
         next(error);
     }
 }
 
+const deleteFolderContent = async(parentId: string) => {
+
+    if(!mongoose.isValidObjectId(parentId))
+    {
+        throw createHttpError(400, "Invalid note id");
+    }
+    const subFoldersAndFilesCursor = await FFModel.BaseModel.find({parentId: parentId}).cursor();
+    //can not recursively delete, need to cbhange this to helper function and make delete tecursive 
+    for (let document = await subFoldersAndFilesCursor.next(); document != null; document = await subFoldersAndFilesCursor.next()){
+        if(document.objectType == 'FOLDER'){
+            deleteFolderContent(document._id.toString());
+        }else{
+            deleteFileHelper(<FFModel.File>document);
+        }
+        document.remove();
+    }
+}
 export const deleteFile: RequestHandler = async (req, res, next) => {
     const objectID = req.params.objectId;
     try{

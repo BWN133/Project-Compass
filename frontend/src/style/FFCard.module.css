@@ -1,0 +1,36 @@
+.img_display
+{
+    height: 80vh; /* or any other value that you want */
+    width: auto;
+    display: block; /* to center the image horizontally */
+    margin: 0 auto; /* to center the image horizontally */
+}
+
+.boarder_img
+{
+    border: 2px solid #ccc; /* or any other border style that you want */
+    padding: 10px; /* optional: add some padding to create some space between the image and the border */
+}
+
+
+
+
+.noteCard {
+    background-color: cornsilk;
+    height: 50px;
+}
+.cardBody {
+    overflow: hidden;
+    mask-image: linear-gradient(180deg, #000 60%, transparent);
+    display: flex;
+    align-items: center; /* Align items vertically in the center */
+    padding: 20px;
+}
+
+.cardText {
+    white-space: pre-line;
+}
+
+.cardBody > svg {
+    margin-right: 10px; /* Add some margin to the right of the svg icon */
+  }

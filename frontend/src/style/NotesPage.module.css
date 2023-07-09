@@ -5,6 +5,7 @@
 }
 
 .notesGrid {
+    margin-top: 20px; /* Or any other value that you want */
     width: 100%;
 }
 
