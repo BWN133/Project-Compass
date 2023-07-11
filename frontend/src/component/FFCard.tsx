@@ -11,9 +11,10 @@ interface FFCardProps {
     showCheckMark: boolean,
     className?: string,
     handleCheckboxClick: (deletefile: string, isChecked: boolean) => void,
+    handleDownloadClick: (downloadFileID:string) => void,
 }
 
-const FFCard = ({FFContent, onclicked,className,showCheckMark, handleCheckboxClick}:FFCardProps) => {
+const FFCard = ({FFContent, onclicked,className,showCheckMark, handleCheckboxClick, handleDownloadClick}:FFCardProps) => {
     const {
       _id,
       title,
@@ -50,6 +51,10 @@ const FFCard = ({FFContent, onclicked,className,showCheckMark, handleCheckboxCli
             {FFContent.title}
           </Card.Title>
           {showCheckMark && checkForm}
+          <Button onClick={(e) => {
+            handleDownloadClick(FFContent._id);
+            e.stopPropagation();
+            }}>download</Button>
           </Card.Body>
         </Card>)
 }

@@ -16,11 +16,6 @@ interface DataModelOrImage{
     displayImage: boolean,
 }
 
-interface FFSelected{
-    FFId: string,
-    Selected: boolean
-}
-
 const HomePage = () => {
     const { navigate} = useNavigation();
     const [DataModel, setDataModel] = useState<DataModelOrImage>({
@@ -46,6 +41,7 @@ const HomePage = () => {
                 if(segments.length === 2 || segments[segments.length - 2] === 'folder')
                 {
                     const Folders = await dataApi.fecthFolderFromParentId(parentId);
+                    
                     setDataModel({
                         FFDataModel: Folders,
                         displayImage: false,
@@ -67,9 +63,7 @@ const HomePage = () => {
     async function onDeleteClicked(){
         let newDataModel:FFModel[] = [];
         for(let index = 0; index < DataModel.FFDataModel.length; index++){
-            console.log("break point in onDeleteClicked with Index: ", index);
             const currentFFDataModel = DataModel.FFDataModel[index];
-            console.log("break point in onDeleteClicked successfully got datamodel info ", index);
             const currentId:string = currentFFDataModel._id;
             
             if(foldersAndFilesToDelete.current[currentId])
@@ -79,20 +73,14 @@ const HomePage = () => {
             {
                 newDataModel.push(currentFFDataModel);
             }
-            console.log("break point in onDeleteClicked successfully finished operation ", index);
         }
-        console.log("break point in ondelecClicked finsied for loop");
         setDataModel({
             FFDataModel: newDataModel,
             displayImage: DataModel.displayImage,
         });
-        console.log("break point in ondelecClicked finsied setDataModel");
         foldersAndFilesToDelete.current = {};
-        console.log("break point in ondelecClicked finished clean up");
         setShowDeleteFF(false);
     }
-
-    console.log("break point 00");
     const folderGrid =
         <Row xs={1} md={2} xl={3} className={`g-4 ${styles.notesGrid}`} style={{ marginTop: "20px" }}>
             {DataModel.FFDataModel.map(FF => (
@@ -107,6 +95,24 @@ const HomePage = () => {
                         showCheckMark={showDeleteFF}
                         handleCheckboxClick = {(deletefile: string, isChecked: boolean) => {
                             foldersAndFilesToDelete.current[deletefile] = isChecked;
+                        }}
+                        handleDownloadClick={(downloadFileId:string) => {
+                            for(let index = 0; index < DataModel.FFDataModel.length; index++)
+                            {
+                                const currentModel = DataModel.FFDataModel[index];
+                                if(currentModel._id === downloadFileId)
+                                {
+                                    const arrayBuffer = new Uint8Array(currentModel.fileContent.buffer.data).buffer;
+                                    const mimeType = currentModel.fileContent.buffer.type;
+                                    const blob = new Blob([arrayBuffer], {type: mimeType }); 
+                                    const fileDownloadUrl = URL.createObjectURL(blob);
+                                    let a = document.createElement('a');
+                                    a.href = fileDownloadUrl;
+                                    a.download = currentModel.title;
+                                    a.click();
+                                    break;
+                                }
+                            }
                         }}
                     />
                 </Col>
