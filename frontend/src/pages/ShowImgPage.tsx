@@ -18,6 +18,7 @@ const ShowImgPage = () =>
                 const segments = currentPath.split('/');
                 const imgId = segments[segments.length - 1];
                 if(imgId === 'imgShow') throw new ReferenceError('imgId not Found');
+                // TODO: This data can be acquired from homePage DataModel as it should already been acquired
                 const file = await dataApi.fecthFileWithId(imgId);
                 setImg(Buffer.from(file.fileContent.buffer.data).toString('base64'));
                 console.log("successfully setted image");

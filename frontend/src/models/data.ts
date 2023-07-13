@@ -1,7 +1,7 @@
 export interface BufferType {
     buffer:{
         data: Buffer,
-        type: String,
+        type: string,
     }
 }
 

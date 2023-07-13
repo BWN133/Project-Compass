@@ -212,7 +212,6 @@ export const GetFileFromParentHelper = async(parentFieldId:string, next:NextFunc
         }
 
         return result;
-        return {};
     }catch(error){
         next(error);
     }
@@ -262,6 +261,7 @@ export const deleteFolder: RequestHandler<unknown, unknown, DeleteFolderBody, un
             await deleteFolderContent(objectID);
         }
         await object.remove();
+        console.log("sueccessfully deleted");
         res.sendStatus(204);
     }catch(error){
         next(error);
