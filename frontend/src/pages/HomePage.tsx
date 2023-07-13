@@ -9,7 +9,6 @@ import { FF as FFModel } from "../models/data";
 import ShowImgPage from './ShowImgPage';
 import {useNavigation} from '../network/Navigate';
 import AddEditNoteDialog from '../component/AddEditFFDialogBox';
-import TempAddEditFileDialog from '../component/TempAddFileDialog';
 
 interface DataModelOrImage{
     FFDataModel: FFModel[],
