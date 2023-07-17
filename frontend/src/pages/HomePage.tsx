@@ -123,6 +123,8 @@ const HomePage = () => {
             <Button onClick={() => setShowAddFileDialog(true)}> Add File </Button>
             <Button onClick={() => setShowDeleteFF(!showDeleteFF)}> SelectFile </ Button>
             <Button onClick={() => {onDeleteClicked()}}> Delete </ Button>
+            {/* To home */}
+            <Button onClick={() => {window.location.href = "http://localhost:3000/"}}> Home </ Button>
             {showAddDialog && <AddEditNoteDialog
             onDismiss={() => setShowAddDialog(false)}
             onFFSaved = {(newFFModel) => {

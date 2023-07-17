@@ -30,7 +30,7 @@ router.get("/folder/:parentFieldId",FFController.GetFileFromParent);
 
 router.get("/folderG/:parentFieldId", FFController.GetGrandParentFolder);
 
-router.get("/file/:fileId", FFController.GetFile);
+router.get("/file/:fileId", FFController.cacheFileData, FFController.GetFile);
 
 router.delete("/folder", FFController.deleteFolder);
 
