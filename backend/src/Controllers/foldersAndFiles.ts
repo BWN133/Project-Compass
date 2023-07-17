@@ -267,7 +267,8 @@ export const GetFileFromParentHelper = async (parentFieldId: string, next: NextF
             NX: true,
           });
         return result;
-    }catch(error){
+        return {};
+    } catch (error) {
         next(error);
     }
 }
