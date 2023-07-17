@@ -168,7 +168,7 @@ const getFileHelper = async (file: FFModel.File, id: string) => {
 }
 
 // get fileData from redis
-export const cacheFileData: RequestHandler = async (req, res, next) => {
+export const GetFileDataCached: RequestHandler = async (req, res, next) => {
     const cache = await getCache()
     const fileId = req.params.fileId + "";
     let resultFileDataRedis;
@@ -220,6 +220,7 @@ export const GetFileFromParent: RequestHandler = async (req, res, next) => {
         if (!mongoose.isValidObjectId(parentFieldId)) {
             throw createHttpError(400, "Invalid file id");
         }
+        console.log("run GetFileFromParent");
         const result = await GetFileFromParentHelper(parentFieldId, next);
         // const result = await CacheFileFromParent(parentFieldId, next);
         res.status(200).json(result);
@@ -241,7 +242,6 @@ export const GetHomeFolder: RequestHandler = async (req, res, next) => {
         next(error);
     }
 }
-
 
 
 export const GetFileFromParentHelper = async (parentFieldId: string, next: NextFunction) => {
@@ -355,28 +355,49 @@ export const deleteFile: RequestHandler = async (req, res, next) => {
 }
 
 
-export const CacheFileFromParent  = async (parentFieldId: string, next: NextFunction) => {
-    const cache = await getCache();
-    try {
-        if (!mongoose.isValidObjectId(parentFieldId)) {
-            throw createHttpError(400, "Invalid file id");
-        }
-        // const subFileResult = await cache.get(parentFieldId + "FileFromParent");
-        const subFileResult = await cache.get(parentFieldId + "FileFromParent");
-        console.log("mongodb or redis?");
-        if (subFileResult) {
-        console.log("get subFileResult from redis");
+// export const CacheFileFromParent  = async (parentFieldId: string, next: NextFunction) => {
+//     const cache = await getCache();
+//     try {
+//         if (!mongoose.isValidObjectId(parentFieldId)) {
+//             throw createHttpError(400, "Invalid file id");
+//         }
+//         // const subFileResult = await cache.get(parentFieldId + "FileFromParent");
+//         const subFileResult = await cache.get(parentFieldId + "FileFromParent");
+//         console.log("mongodb or redis?");
+//         if (subFileResult) {
+//         console.log("get subFileResult from redis");
          
-        const result = JSON.parse(subFileResult);
-        // console.log("result[]: " + result);
-        return result;
-        return {}; } else {
-            console.log("get FileFromParent from mongodb");
+//         const result = JSON.parse(subFileResult);
+//         // console.log("result[]: " + result);
+//         return result;
+//         return {}; } else {
+//             console.log("get FileFromParent from mongodb");
 
-            return await GetFileFromParentHelper(parentFieldId, next);
+//             return await GetFileFromParentHelper(parentFieldId, next);
+//         }
+
+//     } catch (error) {
+//         next(error);
+//     }
+// }
+
+
+// get fileData from redis
+export const GetFileFromParentCached: RequestHandler = async (req, res, next) => {
+    const cache = await getCache()
+    const parentFieldId = req.params.parentFieldId;
+    let resultFileDataRedis;
+    try {
+        const result = await cache.get(parentFieldId + "FileFromParent");
+        if (result) {
+            console.log("Successfully get Data from cache");
+            resultFileDataRedis = JSON.parse(result);
+            res.status(200).json(resultFileDataRedis);
+        } else {
+        next();
         }
-
     } catch (error) {
+        console.error(error);
         next(error);
     }
 }

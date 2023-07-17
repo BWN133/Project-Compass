@@ -26,11 +26,11 @@ router.post("/folder", FFController.createFolder);
 
 router.post("/file", upload.single('fileContent'), FFController.createFile);
 
-router.get("/folder/:parentFieldId",FFController.GetFileFromParent);
+router.get("/folder/:parentFieldId", FFController.GetFileFromParentCached, FFController.GetFileFromParent);
 
 router.get("/folderG/:parentFieldId", FFController.GetGrandParentFolder);
 
-router.get("/file/:fileId", FFController.cacheFileData, FFController.GetFile);
+router.get("/file/:fileId", FFController.GetFileDataCached, FFController.GetFile);
 
 router.delete("/folder", FFController.deleteFolder);
 
