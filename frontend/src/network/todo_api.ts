@@ -26,31 +26,31 @@ export interface FolderInput{
 }
 
 export async function fetchFolder(): Promise<FFModel[]> {
-    const response = await fetchDataWrapper("http://localhost:5000/api/FF", { method: "GET" });
+    const response = await fetchDataWrapper("http://localhost:8000/api/FF", { method: "GET" });
     return response.json();
 }
 
 export async function fecthFolderFromParentId(parentId: string): Promise<FFModel[]> {
-    const response = await fetchDataWrapper("http://localhost:5000/api/FF/Folder/" + parentId , { method: "GET" });
+    const response = await fetchDataWrapper("http://localhost:8000/api/FF/Folder/" + parentId , { method: "GET" });
     return response.json();
 }
 
 export async function fecthFileWithId(id: string): Promise<FFModel> {
-    const response = await fetchDataWrapper("http://localhost:5000/api/FF/File/" + id , { method: "GET" });
+    const response = await fetchDataWrapper("http://localhost:8000/api/FF/File/" + id , { method: "GET" });
     //console.log("In data api response.json look like:Te", response.json());
     return response.json();
 }
 
 
 export async function fecthGrandparentFolderFromParentId(parentId: string): Promise<FFModel[]> {
-    const response = await fetchDataWrapper("http://localhost:5000/api/FF/FolderG/" + parentId , { method: "GET" });
+    const response = await fetchDataWrapper("http://localhost:8000/api/FF/FolderG/" + parentId , { method: "GET" });
     return response.json();
 }
 
 export async function deleteDataFromId(targetId: string): Promise<number>{
     console.log("In Frontend TODO Api we recieved ID for delete: ",targetId);
     const DeleteFolderBody = {objectId: targetId}
-    const response = await fetchDataWrapper("http://localhost:5000/api/FF/folder",
+    const response = await fetchDataWrapper("http://localhost:8000/api/FF/folder",
     {
         method:"DELETE",
         headers: {"Content-Type": "application/json"},
@@ -69,7 +69,7 @@ export async function uploadData(inputTitle: string, inputParentId: string, inpu
     let response = null;
     if(inputFileType === 'folder')
     {
-        response = await fetchDataWrapper("http://localhost:5000/api/FF/" + inputFileType, 
+        response = await fetchDataWrapper("http://localhost:8000/api/FF/" + inputFileType, 
         {method: "POST", 
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(inputData),
@@ -79,7 +79,7 @@ export async function uploadData(inputTitle: string, inputParentId: string, inpu
         const formData = new FormData();
         formData.append('fileContent', image); 
         formData.append('parentId', inputParentId);
-        response = await fetchDataWrapper("http://localhost:5000/api/FF/" + inputFileType, 
+        response = await fetchDataWrapper("http://localhost:8000/api/FF/" + inputFileType, 
         {method: "POST", 
         body: formData,
         });
