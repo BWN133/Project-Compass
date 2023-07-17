@@ -8,12 +8,14 @@ import session from "express-session";
 import env from "./util/validateEnv";
 import MongoStore from "connect-mongo";
 import cors from "cors";
+
 const app = express();
 
 app.use(morgan('dev'));
 
 app.use(express.json());
 app.use(cors());
+
 app.use(session({
     secret: env.SESSION_SECRET,
     resave: false,
@@ -26,11 +28,11 @@ app.use(session({
         mongoUrl: env.MONGO_CONNECTION_STRING
     }),
 }))
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "http://localhost:3000/folder/6480930adfe2f0923fc8fdc5"); // update to match the domain you will make the request from
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
-  });
+});
 
 app.use("/api/users", userRouters);
 
