@@ -1,12 +1,13 @@
 import * as FFModel from "../models/folderAndFiles";
 import { NextFunction, RequestHandler } from "express";
 import createHttpError from "http-errors";
-import mongoose, { Schema, ObjectId } from "mongoose";
+import { isValidObjectId, Schema, ObjectId } from "mongoose";
 import { assertIsDefined } from "../util/assertIsDefined";
 import multer from "multer";
 import env from "../util/validateEnv";
 import { getCache } from '../cache'
-import {parse, stringify, toJSON, fromJSON} from 'flatted';
+import { parse, stringify, toJSON, fromJSON } from 'flatted';
+import getResponse from "../util/openaiConnection";
 
 // TODO: Test create with postman
 
@@ -17,7 +18,6 @@ interface CreateFolderBody {
     title?: string,
     parentId?: string,
 }
-
 
 export const createFolder: RequestHandler<unknown, unknown, CreateFolderBody, unknown> = async (req, res, next) => {
     //TODO:  Authentication
@@ -70,7 +70,6 @@ interface CreateFileBody {
     parentId?: string,
 }
 
-
 export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknown> = async (req, res, next) => {
     //TODO:  Authentication
     const cache = await getCache()
@@ -78,7 +77,7 @@ export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknow
     const parentId = req.body.parentId;
 
     try {
-        if (!mongoose.isValidObjectId(parentId)) {
+        if (!isValidObjectId(parentId)) {
             throw createHttpError(400, "Invalid parent Id");
         }
         const parentFolder = await FFModel.FolderModel.findById(parentId);
@@ -104,7 +103,7 @@ export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknow
         cache.set(fileIdName, JSON.stringify(foldersAndFiles), {
             EX: 300,
             NX: true,
-          });
+        });
         console.log("save meta file data to redis");
         res.status(201).json(foldersAndFiles);
     } catch (error) {
@@ -112,14 +111,13 @@ export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknow
     }
 };
 
-
 export const getParentFolder: RequestHandler = async (req, res, next) => {
-    const parentFieldId = env.DEFAULTPAGE_PARENTID;
+    const parentId = env.DEFAULTPAGE_PARENTID;
     try {
-        if (!mongoose.isValidObjectId(parentFieldId)) {
+        if (!isValidObjectId(parentId)) {
             throw createHttpError(400, "Invalid file id");
         }
-        const result = await GetFileFromParentHelper(parentFieldId, next);
+        const result = await GetFileFromParentHelper(parentId, next);
         res.status(200).json(result);
     } catch (error) {
         next(error);
@@ -127,9 +125,9 @@ export const getParentFolder: RequestHandler = async (req, res, next) => {
 }
 
 export const GetGrandParentFolder: RequestHandler = async (req, res, next) => {
-    const folderId = req.params.parentFieldId;
+    const folderId = req.params.parentId;
     try {
-        if (!mongoose.isValidObjectId(folderId)) {
+        if (!isValidObjectId(folderId)) {
             throw createHttpError(400, "Invalid file id");
         }
         const currentFolderMeta = await FFModel.FolderModel.findById(folderId);
@@ -179,7 +177,7 @@ export const GetFileDataCached: RequestHandler = async (req, res, next) => {
             console.log("get resultFileData from redis");
             res.status(200).json(resultFileDataRedis);
         } else {
-        next();
+            next();
         }
     } catch (error) {
         console.error(error);
@@ -194,17 +192,17 @@ export const GetFile: RequestHandler = async (req, res, next) => {
     const cache = await getCache();
 
     try {
-        if (!mongoose.isValidObjectId(fileId)) {
+        if (!isValidObjectId(fileId)) {
             throw createHttpError(400, "Invalid file id");
         }
-        
+
         const file = await FFModel.FileModel.findById(fileId);
 
         const resultFileData = await getFileHelper(<FFModel.File>file, fileId);
-        cache.set(fileId,JSON.stringify(resultFileData), {
+        cache.set(fileId, JSON.stringify(resultFileData), {
             EX: 300,
             NX: true,
-          });
+        });
         console.log("save resultFileData to redis");
         console.log("get resultFileData from mongodb");
         res.status(200).json(resultFileData);
@@ -215,14 +213,14 @@ export const GetFile: RequestHandler = async (req, res, next) => {
 
 
 export const GetFileFromParent: RequestHandler = async (req, res, next) => {
-    const parentFieldId = req.params.parentFieldId;
+    const parentId = req.params.parentId;
     try {
-        if (!mongoose.isValidObjectId(parentFieldId)) {
+        if (!isValidObjectId(parentId)) {
             throw createHttpError(400, "Invalid file id");
         }
         console.log("run GetFileFromParent");
-        const result = await GetFileFromParentHelper(parentFieldId, next);
-        // const result = await CacheFileFromParent(parentFieldId, next);
+        const result = await GetFileFromParentHelper(parentId, next);
+        // const result = await CacheFileFromParent(parentId, next);
         res.status(200).json(result);
     } catch (error) {
         next(error);
@@ -230,13 +228,13 @@ export const GetFileFromParent: RequestHandler = async (req, res, next) => {
 }
 
 export const GetHomeFolder: RequestHandler = async (req, res, next) => {
-    const parentFieldId = env.DEFAULTPAGE_PARENTID;
+    const parentId = env.DEFAULTPAGE_PARENTID;
     try {
-        if (!mongoose.isValidObjectId(parentFieldId)) {
+        if (!isValidObjectId(parentId)) {
             throw createHttpError(400, "Invalid file id");
         }
 
-        const result = await GetFileFromParentHelper(parentFieldId, next);
+        const result = await GetFileFromParentHelper(parentId, next);
         res.status(200).json(result);
     } catch (error) {
         next(error);
@@ -244,13 +242,13 @@ export const GetHomeFolder: RequestHandler = async (req, res, next) => {
 }
 
 
-export const GetFileFromParentHelper = async (parentFieldId: string, next: NextFunction) => {
+export const GetFileFromParentHelper = async (parentId: string, next: NextFunction) => {
     const cache = await getCache();
     try {
-        if (!mongoose.isValidObjectId(parentFieldId)) {
+        if (!isValidObjectId(parentId)) {
             throw createHttpError(400, "Invalid file id");
         }
-        const subFileCursor = FFModel.BaseModel.find({ parentId: parentFieldId }).cursor();
+        const subFileCursor = FFModel.BaseModel.find({ parentId: parentId }).cursor();
         const result = [];
         for (let document = await subFileCursor.next(); document != null; document = await subFileCursor.next()) {
             if (document.objectType == 'FOLDER') {
@@ -262,10 +260,10 @@ export const GetFileFromParentHelper = async (parentFieldId: string, next: NextF
         }
         console.log("save FileFromParent result to redis");
         // console.log("result[]: " + result);
-        cache.set(parentFieldId + "FileFromParent", JSON.stringify(result), {
+        cache.set(parentId + "FileFromParent", JSON.stringify(result), {
             EX: 300,
             NX: true,
-          });
+        });
         return result;
         return {};
     } catch (error) {
@@ -273,7 +271,26 @@ export const GetFileFromParentHelper = async (parentFieldId: string, next: NextF
     }
 }
 
-const deleteFileHelper = async (file: FFModel.File) => {
+/* 
+export const deleteFile: RequestHandler = async (req, res, next) => {
+    const objectId = req.params.objectId;
+    try {
+        if (!isValidObjectId(objectId)) {
+            throw createHttpError(400, "Invalid note id");
+        }
+        const file = await FFModel.FileModel.findById((objectId));
+        if (!file) {
+            throw createHttpError(404, "File not found");
+        }
+        await deleteFileHelper(file);
+        res.sendStatus(204);
+    } catch (error) {
+        next(error);
+    }
+}
+ */
+
+const deleteFile = async (file: FFModel.File) => {
     if (!file) {
         throw createHttpError(404, "File not found");
     }
@@ -289,30 +306,43 @@ const deleteFileHelper = async (file: FFModel.File) => {
     return
 };
 
+const deleteFolder = async (parentId: string) => {
 
+    if (!isValidObjectId(parentId)) {
+        throw createHttpError(400, "Folder not found");
+    }
+    const subFoldersAndFilesCursor = FFModel.BaseModel.find({ parentId: parentId }).cursor();
+    //can not recursively delete, need to cbhange this to helper function and make delete tecursive 
+    for (let document = await subFoldersAndFilesCursor.next(); document != null; document = await subFoldersAndFilesCursor.next()) {
+        if (document.objectType == 'FOLDER') {
+            deleteFolder(document._id.toString());
+        } else {
+            deleteFile(<FFModel.File>document);
+        }
+        document.remove();
+    }
+}
 
-
-
-interface DeleteFolderBody {
+interface DeleteItemBody {
     objectId: string
 }
 
-export const deleteFolder: RequestHandler<unknown, unknown, DeleteFolderBody, unknown> = async (req, res, next) => {
+export const deleteItem: RequestHandler<unknown, unknown, DeleteItemBody, unknown> = async (req, res, next) => {
     // TODO: Authentication
-    const objectID = req.body.objectId;
-    console.log(objectID);
+    const objectId = req.body.objectId;
+    console.log(objectId);
     try {
-        if (!mongoose.isValidObjectId(objectID)) {
-            throw createHttpError(400, "Invalid note id");
+        if (!isValidObjectId(objectId)) {
+            throw createHttpError(400, "Invalid id");
         }
-        const object = await FFModel.BaseModel.findById(objectID);
+        const object = await FFModel.BaseModel.findById(objectId);
         if (!object) {
-            throw createHttpError(404, "Note not found");
+            throw createHttpError(404, "Item not found");
         }
         if (object.objectType == 'FILE') {
-            await deleteFileHelper(<FFModel.File>object);
+            await deleteFile(<FFModel.File>object);
         } else {
-            await deleteFolderContent(objectID);
+            await deleteFolder(objectId);
         }
         await object.remove();
         console.log("sueccessfully deleted");
@@ -322,59 +352,25 @@ export const deleteFolder: RequestHandler<unknown, unknown, DeleteFolderBody, un
     }
 }
 
-const deleteFolderContent = async (parentId: string) => {
-
-    if (!mongoose.isValidObjectId(parentId)) {
-        throw createHttpError(400, "Invalid note id");
-    }
-    const subFoldersAndFilesCursor = FFModel.BaseModel.find({ parentId: parentId }).cursor();
-    //can not recursively delete, need to cbhange this to helper function and make delete tecursive 
-    for (let document = await subFoldersAndFilesCursor.next(); document != null; document = await subFoldersAndFilesCursor.next()) {
-        if (document.objectType == 'FOLDER') {
-            deleteFolderContent(document._id.toString());
-        } else {
-            deleteFileHelper(<FFModel.File>document);
-        }
-        document.remove();
-    }
-}
-export const deleteFile: RequestHandler = async (req, res, next) => {
-    const objectID = req.params.objectId;
-    try {
-        if (!mongoose.isValidObjectId(objectID)) {
-            throw createHttpError(400, "Invalid note id");
-        }
-        const file = await FFModel.FileModel.findById((objectID));
-        if (!file) {
-            throw createHttpError(404, "File not found");
-        }
-        await deleteFileHelper(file);
-        res.sendStatus(204);
-    } catch (error) {
-        next(error);
-    }
-}
-
-
-// export const CacheFileFromParent  = async (parentFieldId: string, next: NextFunction) => {
+// export const CacheFileFromParent  = async (parentId: string, next: NextFunction) => {
 //     const cache = await getCache();
 //     try {
-//         if (!mongoose.isValidObjectId(parentFieldId)) {
+//         if (!isValidObjectId(parentId)) {
 //             throw createHttpError(400, "Invalid file id");
 //         }
-//         // const subFileResult = await cache.get(parentFieldId + "FileFromParent");
-//         const subFileResult = await cache.get(parentFieldId + "FileFromParent");
+//         // const subFileResult = await cache.get(parentId + "FileFromParent");
+//         const subFileResult = await cache.get(parentId + "FileFromParent");
 //         console.log("mongodb or redis?");
 //         if (subFileResult) {
 //         console.log("get subFileResult from redis");
-         
+
 //         const result = JSON.parse(subFileResult);
 //         // console.log("result[]: " + result);
 //         return result;
 //         return {}; } else {
 //             console.log("get FileFromParent from mongodb");
 
-//             return await GetFileFromParentHelper(parentFieldId, next);
+//             return await GetFileFromParentHelper(parentId, next);
 //         }
 
 //     } catch (error) {
@@ -386,19 +382,61 @@ export const deleteFile: RequestHandler = async (req, res, next) => {
 // get fileData from redis
 export const GetFileFromParentCached: RequestHandler = async (req, res, next) => {
     const cache = await getCache()
-    const parentFieldId = req.params.parentFieldId;
+    const parentId = req.params.parentId;
     let resultFileDataRedis;
     try {
-        const result = await cache.get(parentFieldId + "FileFromParent");
+        const result = await cache.get(parentId + "FileFromParent");
         if (result) {
             console.log("Successfully get Data from cache");
             resultFileDataRedis = JSON.parse(result);
             res.status(200).json(resultFileDataRedis);
         } else {
-        next();
+            next();
         }
     } catch (error) {
         console.error(error);
+        next(error);
+    }
+}
+
+interface RenameItemBody {
+    objectId?: string
+    title?: string
+}
+
+export const renameItem: RequestHandler<unknown, unknown, RenameItemBody, unknown> = async (req, res, next) => {
+    const { objectId: objectId, title: title } = req.body;
+    try {
+        if (!isValidObjectId(objectId)) throw createHttpError(400, "Invalid item ID");
+        if (!title) throw createHttpError(400, "Item must have a title");
+
+        const item = await FFModel.BaseModel.findById(objectId);
+
+        if (!item) throw createHttpError(404, "Item not found");
+
+        item.title = title;
+        res.status(200).json(await item.save());
+    } catch (error) {
+        next(error);
+    }
+}
+
+// TODO: create new folders with the response
+interface getOpenaiResponseBody {
+    title?: string,
+    description?: string
+}
+
+export const getOpenaiResponse: RequestHandler<unknown, unknown, getOpenaiResponseBody, unknown> = async (req, res, next) => {
+    const { title: title, description: description } = req.body
+    try {
+        if (!title) throw createHttpError(400, "Project must have a name");
+        if (!description) throw createHttpError(400, "Project must have a description");
+
+        const response = await getResponse(title, description)
+
+        res.status(200).json(response.data.choices[0].message?.content);
+    } catch (error) {
         next(error);
     }
 }

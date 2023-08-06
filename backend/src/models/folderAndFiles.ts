@@ -1,4 +1,4 @@
-import {Schema,InferSchemaType, model} from "mongoose";
+import { Schema, InferSchemaType, model } from "mongoose";
 import mongoose from "mongoose";
 import env from "../util/validateEnv";
 
@@ -6,36 +6,36 @@ import env from "../util/validateEnv";
 
 const baseOptions = {
     discriminatorKey: "__type",
-    collection:'data',
+    collection: 'data',
     timestamps: true,
 }
 
 
 const folderSchema = new Schema({
-    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID)},
-    title: { type: String, defualt: "none"},
-    parentId: {type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID)},
-    objectType: {type: String},
+    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID) },
+    title: { type: String, defualt: "none" },
+    parentId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID) },
+    objectType: { type: String },
 }, baseOptions);
 
 const fileSchema = new Schema({
-    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID)},
-    title: { type: String, defualt: "none"},
-    parentId: {type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID)},
-    objectType: {type: String},
-    fileMeta:{type: String},
+    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID) },
+    title: { type: String, defualt: "none" },
+    parentId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID) },
+    objectType: { type: String },
+    fileMeta: { type: String },
 }, baseOptions);
 
-const fileMetaSchema = new Schema({filename:{type: String}}, {collection:'uploads.files'});
+const fileMetaSchema = new Schema({ filename: { type: String } }, { collection: 'uploads.files' });
 const chunkSchema = new Schema({
-    files_id:{type: Schema.Types.ObjectId},
-    _id: {type: Schema.Types.ObjectId},
-    n: {type: Number},
+    files_id: { type: Schema.Types.ObjectId },
+    _id: { type: Schema.Types.ObjectId },
+    n: { type: Number },
     data: {
         data: Buffer,
         contentType: String,
     },
-}, {collection:'uploads.chunks'});
+}, { collection: 'uploads.chunks' });
 type Base = InferSchemaType<typeof folderSchema>;
 
 type File = InferSchemaType<typeof fileSchema>;
@@ -50,11 +50,7 @@ const FolderModel = BaseModel.discriminator<Base>('Folder', new Schema({}, baseO
 
 const FileModel = BaseModel.discriminator<File>('File', fileSchema);
 
-
-
-
-
-export {FolderModel, FileModel, BaseModel, uploadMetaModel, chunkModel, File, Base};
+export { FolderModel, FileModel, BaseModel, uploadMetaModel, chunkModel, File, Base };
 
 
 

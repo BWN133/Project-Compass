@@ -36,13 +36,7 @@ app.use(function (req, res, next) {
 
 app.use("/api/users", userRouters);
 
-
-
-
 app.use("/api/FF", FFRoutes);
-
-
-
 
 app.use((req, res, next) => {
     next(createHttpError(404, "Endpoint not found"));

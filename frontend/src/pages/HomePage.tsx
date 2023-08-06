@@ -7,46 +7,48 @@ import styles from "../style/NotesPage.module.css";
 import FFCard from '../component/FFCard';
 import { FF as FFModel } from "../models/data";
 import ShowImgPage from './ShowImgPage';
-import {useNavigation} from '../network/Navigate';
-import AddEditNoteDialog from '../component/AddEditFFDialogBox';
-
-interface DataModelOrImage{
+import { useNavigation } from '../network/Navigate';
+import InputDialog from '../component/DialogBox';
+interface DataModelOrImage {
     FFDataModel: FFModel[],
     displayImage: boolean,
 }
+interface ButtonStates {
+    delete: boolean,
+    rename: boolean
+}
 
 const HomePage = () => {
-    const { navigate} = useNavigation();
+    const { navigate } = useNavigation();
+    const currentParentId = useRef("6348acd2e1a47ca32e79f46f");
+    const selectedItemIds = useRef<Set<string>>(new Set());
     const [DataModel, setDataModel] = useState<DataModelOrImage>({
         FFDataModel: [],
         displayImage: false,
     });
-    const [showAddDialog, setShowAddDialog] = useState(false);
-    const [showAddFileDialog, setShowAddFileDialog] = useState(false);
-    const [showDeleteFF, setShowDeleteFF] = useState(false);
-    const currentParentId = useRef("6348acd2e1a47ca32e79f46f");
-    const foldersAndFilesToDelete = useRef<{[FFID:string]: boolean}>({});
+    const [showButtons, setShowButtons] = useState<ButtonStates>({
+        delete: false,
+        rename: false
+    });
+    const [dialogMode, setDialogMode] = useState<string | null>(null);
+    const [showCheckbox, setShowCheckbox] = useState(false);
 
     useEffect(() => {
         async function loadNotes() {
-            
             const currentPath = window.location.pathname;
             const segments = currentPath.split('/');
-            const parentId = segments.length === 2 ? "6348acd2e1a47ca32e79f46f" : segments[segments.length - 1];
+            const parentId = (segments.length === 2) ? "6348acd2e1a47ca32e79f46f" : segments[segments.length - 1];
             currentParentId.current = parentId;
-            foldersAndFilesToDelete.current = {};
             console.log("current segment length:", segments.length);
             try {
-                if(segments.length === 2 || segments[segments.length - 2] === 'folder')
-                {
-                    const Folders = await dataApi.fecthFolderFromParentId(parentId);
-                    
+                if (segments.length === 2 || segments[segments.length - 2] === 'folder') {
+                    const Folders = await dataApi.fetchFolderByParentId(parentId);
+
                     setDataModel({
                         FFDataModel: Folders,
                         displayImage: false,
                     });
-                }else
-                {
+                } else {
                     setDataModel({
                         FFDataModel: [],
                         displayImage: true,
@@ -59,27 +61,70 @@ const HomePage = () => {
         loadNotes();
     }, [navigate]);
 
-    async function onDeleteClicked(){
-        let newDataModel:FFModel[] = [];
-        for(let index = 0; index < DataModel.FFDataModel.length; index++){
-            const currentFFDataModel = DataModel.FFDataModel[index];
-            const currentId:string = currentFFDataModel._id;
-            
-            if(foldersAndFilesToDelete.current[currentId])
-            {
-                await dataApi.deleteDataFromId(currentId);
-            }else
-            {
-                newDataModel.push(currentFFDataModel);
-            }
+    function updateShowButtons() {
+        const selectionCount = selectedItemIds.current.size;
+        const newShowButtons = { ...showButtons };
+        newShowButtons.delete = selectionCount > 0;
+        newShowButtons.rename = selectionCount === 1;
+        if (JSON.stringify(newShowButtons) !== JSON.stringify(showButtons))
+            setShowButtons(newShowButtons);
+    }
+
+    function handleCheckboxClick(itemId: string, isChecked: boolean) {
+        if (isChecked) {
+            selectedItemIds.current.add(itemId);
+        } else {
+            selectedItemIds.current.delete(itemId);
         }
+        updateShowButtons();
+    }
+
+    function onInputDialogSubmit(newFFModel: FFModel) { // currently the dialog persists for "newProject" mode because this function is not called
+        setDialogMode(null);
+        selectedItemIds.current = new Set();
+        updateShowButtons();
+
+        // TODO: remove this line
+        if (dialogMode === 'newProject') return
+
+        let newFFDataModel = [...DataModel.FFDataModel]
+
+        if (dialogMode === 'rename') {
+            for (let i = 0; i < newFFDataModel.length; i++) {
+                if (newFFDataModel[i]._id === newFFModel._id) {
+                    newFFDataModel[i] = newFFModel;
+                    break;
+                }
+            }
+        } else {
+            newFFDataModel.push(newFFModel);
+        }
+
         setDataModel({
-            FFDataModel: newDataModel,
+            FFDataModel: newFFDataModel,
+            displayImage: DataModel.displayImage
+        });
+    }
+
+    async function onDeleteClicked() {
+        /* for (let i = 0; i < selectedItemIds.length; i++) {
+            const currentId: string = selectedItemIds[i];
+            await dataApi.deleteItemById(currentId);
+        } */
+        selectedItemIds.current.forEach(async (currentId: string) => {
+            await dataApi.deleteItemById(currentId);
+        })
+        setDataModel({
+            FFDataModel: DataModel.FFDataModel.filter(
+                item => !selectedItemIds.current.has(item._id)
+            ),
             displayImage: DataModel.displayImage,
         });
-        foldersAndFilesToDelete.current = {};
-        setShowDeleteFF(false);
+        selectedItemIds.current = new Set();
+        updateShowButtons();
+        setShowCheckbox(false);
     }
+
     const folderGrid =
         <Row xs={1} md={2} xl={3} className={`g-4 ${styles.notesGrid}`} style={{ marginTop: "20px" }}>
             {DataModel.FFDataModel.map(FF => (
@@ -87,23 +132,21 @@ const HomePage = () => {
                     <FFCard
                         FFContent={FF}
                         onclicked={(updatedParentId: string, objectType: string) => {
-                            console.log("Objecttype recieved is: ", objectType);
-                            if(objectType === 'FOLDER') navigate(`/folder/${updatedParentId}`);
-                            else navigate(`/imgShow/${updatedParentId}`);  
+                            console.log("Objectype recieved is: ", objectType);
+                            if (objectType === 'FOLDER') navigate(`/folder/${updatedParentId}`);
+                            else navigate(`/imgShow/${updatedParentId}`);
                         }}
-                        showCheckMark={showDeleteFF}
-                        handleCheckboxClick = {(deletefile: string, isChecked: boolean) => {
-                            foldersAndFilesToDelete.current[deletefile] = isChecked;
+                        showCheckBox={showCheckbox}
+                        handleCheckboxClick={(itemId: string, isChecked: boolean) => {
+                            handleCheckboxClick(itemId, isChecked);
                         }}
-                        handleDownloadClick={(downloadFileId:string) => {
-                            for(let index = 0; index < DataModel.FFDataModel.length; index++)
-                            {
+                        handleDownloadClick={(downloadFileId: string) => {
+                            for (let index = 0; index < DataModel.FFDataModel.length; index++) {
                                 const currentModel = DataModel.FFDataModel[index];
-                                if(currentModel._id === downloadFileId)
-                                {
+                                if (currentModel._id === downloadFileId) {
                                     const arrayBuffer = new Uint8Array(currentModel.fileContent.buffer.data).buffer;
                                     const mimeType = currentModel.fileContent.buffer.type;
-                                    const blob = new Blob([arrayBuffer], {type: mimeType }); 
+                                    const blob = new Blob([arrayBuffer], { type: mimeType });
                                     const fileDownloadUrl = URL.createObjectURL(blob);
                                     let a = document.createElement('a');
                                     a.href = fileDownloadUrl;
@@ -120,42 +163,37 @@ const HomePage = () => {
     return (
         <>
             <div>
-                
-               {/* <Button onClick={() => {navigate(-1);}}> Go Back </Button> */}
+
+                {/* <Button onClick={() => {navigate(-1);}}> Go Back </Button> */}
                 {/* <Button onClick={() => {navigate(1);}}> Go Forward </Button> */}
             </div>
-            <Button onClick={() => setShowAddDialog(true)}> Add Folder </Button>
-            <Button onClick={() => setShowAddFileDialog(true)}> Add File </Button>
-            <Button onClick={() => setShowDeleteFF(!showDeleteFF)}> SelectFile </ Button>
-            <Button onClick={() => {onDeleteClicked()}}> Delete </ Button>
-            {/* To home */}
-            <Button onClick={() => {window.location.href = "http://localhost:3000/"}}> Home </ Button>
-            {showAddDialog && <AddEditNoteDialog
-            onDismiss={() => setShowAddDialog(false)}
-            onFFSaved = {(newFFModel) => {
-                setDataModel({
-                    FFDataModel: [...DataModel.FFDataModel, newFFModel],
-                    displayImage: DataModel.displayImage
-                })
-                setShowAddDialog(false)
-            }}
-            mode='FOLDER'
-            parentId={currentParentId.current}
+            <Button onClick={() => { window.location.href = "http://localhost:3000/" }}> Home </ Button>
+            <Button onClick={() => setDialogMode('newProject')}> Create Project </Button>
+            <Button onClick={() => setDialogMode('newFolder')}> Add Folder </Button>
+            <Button onClick={() => setDialogMode('newFile')}> Add File </Button>
+            <Button onClick={() => {
+                if (showCheckbox) {
+                    selectedItemIds.current = new Set();
+                    updateShowButtons();
+                }
+                setShowCheckbox(!showCheckbox);
+            }}> Select Item(s) </ Button>
+            {showButtons.delete && <Button onClick={() => onDeleteClicked()}> Delete </ Button>}
+            {showButtons.rename && <Button onClick={() => setDialogMode('rename')}> Rename </ Button>}
+
+            {dialogMode && <InputDialog
+                onDismiss={() => setDialogMode(null)}
+                onSubmit={onInputDialogSubmit}
+                mode={dialogMode}
+                // if rename, use the only selected item id
+                Id={
+                    (dialogMode === 'rename') ?
+                        selectedItemIds.current.values().next().value :
+                        currentParentId.current
+                }
             />}
-            {showAddFileDialog && <AddEditNoteDialog
-            onDismiss={() => setShowAddFileDialog(false)}
-            onFFSaved = {(newFFModel) => {
-                setDataModel({
-                    FFDataModel: [...DataModel.FFDataModel, newFFModel],
-                    displayImage: DataModel.displayImage
-                })
-                setShowAddFileDialog(false)
-            }}
-            mode='FILE'
-            parentId={currentParentId.current}
-            />}
-            {!DataModel.displayImage && DataModel.FFDataModel && folderGrid}  
-            {DataModel.displayImage && <ShowImgPage/>}     
+            {!DataModel.displayImage && DataModel.FFDataModel && folderGrid}
+            {DataModel.displayImage && <ShowImgPage />}
         </>);
 }
 
