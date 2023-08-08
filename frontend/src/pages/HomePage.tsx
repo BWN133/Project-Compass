@@ -1,14 +1,16 @@
 import { useEffect, useState, useRef } from 'react';
-import { Container, Button, Col, Row, Spinner } from 'react-bootstrap';
+import { Container, Button, Col, Row, Spinner , Offcanvas} from 'react-bootstrap';
 // import { Link, useNavigate, useRouteMatch} from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import * as dataApi from '../network/todo_api';
 import styles from "../style/NotesPage.module.css";
+import stylesS from "../style/App.module.css";
 import FFCard from '../component/FFCard';
 import { FF as FFModel } from "../models/data";
 import ShowImgPage from './ShowImgPage';
 import { useNavigation } from '../network/Navigate';
 import InputDialog from '../component/DialogBox';
+import SideNav from '../component/SideNav';
 interface DataModelOrImage {
     FFDataModel: FFModel[],
     displayImage: boolean,
@@ -138,7 +140,7 @@ const HomePage = () => {
     }
 
     const folderGrid =
-        <Row xs={1} md={2} xl={3} className={`g-4 ${styles.notesGrid}`} style={{ marginTop: "20px" }}>
+        <Row xs={1} md={2} xl={3} className={`g-4 ${styles.notesGrid} ${stylesS.ContentWrapper}`} style={{ marginTop: "20px" }}>
             {DataModel.FFDataModel.map(FF => (
                 <Col key={FF._id}>
                     <FFCard
@@ -174,12 +176,7 @@ const HomePage = () => {
         </Row>
     return (
         <>
-            <div>
-
-                {/* <Button onClick={() => {navigate(-1);}}> Go Back </Button> */}
-                {/* <Button onClick={() => {navigate(1);}}> Go Forward </Button> */}
-            </div>
-            <Button onClick={() => { window.location.href = "http://localhost:3000/" }}> Home </ Button>
+            {/* <Button onClick={() => { window.location.href = "http://localhost:3000/" }}> Home </ Button>
             <Button onClick={() => setDialogMode('newProject')}> Create Project </Button>
             <Button onClick={() => setDialogMode('newFolder')}> Add Folder </Button>
             <Button onClick={() => setDialogMode('newFile')}> Add File </Button>
@@ -189,10 +186,30 @@ const HomePage = () => {
                     updateShowButtons();
                 }
                 setShowCheckbox(!showCheckbox);
-            }}> Select Item(s) </ Button>
+            }}> Select Item(s) </ Button> */}
+            {/* <Button onClick={() => deleteAllClicked()}>Delete All </Button> */}
+            <Row>
+            <Col xs={3} className="p-0">
+            {/* This section is approximately 20% of the screen width */}
+            <div className={`${stylesS.sidebarWrapper}`}>
+            <SideNav 
+                CreateFolderOnclicked={() => setDialogMode('newFolder')}
+                CreateFileOnclicked={() => setDialogMode('newFile')}
+                SeleteItemOnclicked={() => {
+                    if (showCheckbox) {
+                        selectedItemIds.current = new Set();
+                        updateShowButtons();
+                    }
+                    setShowCheckbox(!showCheckbox);
+                }}
+                DeleteAllOnclicked={() => deleteAllClicked()}
+            />
+            </div>
+            </Col>
+            <Col xs={9}>
             {showButtons.delete && <Button onClick={() => onDeleteClicked()}> Delete </ Button>}
             {showButtons.rename && <Button onClick={() => setDialogMode('rename')}> Rename </ Button>}
-            <Button onClick={() => deleteAllClicked()}>Delete All </Button>
+            {/* This section is approximately 80% of the screen width */}
             {dialogMode && <InputDialog
                 onDismiss={() => setDialogMode(null)}
                 onSubmit={onInputDialogSubmit}
@@ -206,6 +223,8 @@ const HomePage = () => {
             />}
             {!DataModel.displayImage && DataModel.FFDataModel && folderGrid}
             {DataModel.displayImage && <ShowImgPage />}
+            </Col>
+        </Row>
         </>);
 }
 

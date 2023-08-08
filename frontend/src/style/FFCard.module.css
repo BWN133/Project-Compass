@@ -17,7 +17,7 @@
 
 .noteCard {
     background-color: cornsilk;
-    height: 50px;
+
 }
 .cardBody {
     overflow: hidden;
@@ -34,3 +34,11 @@
 .cardBody > svg {
     margin-right: 10px; /* Add some margin to the right of the svg icon */
   }
+
+
+.cardTitle {
+    max-width: calc(100% - 40px);  /* Adjust based on the size of your icon */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

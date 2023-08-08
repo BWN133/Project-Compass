@@ -7,7 +7,7 @@ const NavBar = () => {
     return (
         <Navbar bg="primary" variant="dark" expand="sm" sticky="top">
             <Container>
-                <Navbar.Brand>
+                <Navbar.Brand onClick={()=>{window.location.href = "http://localhost:3000/"}}>
                     Cloud TODO
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="main-navbar" />
