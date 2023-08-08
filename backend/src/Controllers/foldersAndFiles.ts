@@ -9,6 +9,7 @@ import { getCache } from '../cache'
 import { parse, stringify, toJSON, fromJSON } from 'flatted';
 import getResponse from "../util/openaiConnection";
 
+
 // TODO: Test create with postman
 
 
@@ -72,7 +73,7 @@ interface CreateFileBody {
 
 export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknown> = async (req, res, next) => {
     //TODO:  Authentication
-    const cache = await getCache()
+    // const cache = await getCache()
 
     const parentId = req.body.parentId;
 
@@ -88,22 +89,28 @@ export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknow
             throw createHttpError(400, "Please provide a file and filetype");
         }
         const title = req.file.originalname;
+        const chunkId = req.file.id;
+        
+        console.log(req.file.id);
         const foldersAndFiles = await FFModel.FileModel.create({
             userId: undefined,
             title: title,
             parentId: parentId,
             fileMeta: req.file.filename,
             objectType: "FILE",
+            fileSize: req.file.size,
+            chunkId: chunkId,
+            mimeType: req.file.mimetype
         });
         // cache metaFileData
-        const metaFileId = foldersAndFiles._id;
-        const fileId = metaFileId + "";
-        const fileName = foldersAndFiles.title;
-        const fileIdName = fileId + fileName;
-        cache.set(fileIdName, JSON.stringify(foldersAndFiles), {
-            EX: 300,
-            NX: true,
-        });
+        // const metaFileId = foldersAndFiles._id;
+        // const fileId = metaFileId + "";
+        // const fileName = foldersAndFiles.title;
+        // const fileIdName = fileId + fileName;
+        // cache.set(fileIdName, JSON.stringify(foldersAndFiles), {
+        //     EX: 300,
+        //     NX: true,
+        // });
         console.log("save meta file data to redis");
         res.status(201).json(foldersAndFiles);
     } catch (error) {
@@ -146,12 +153,7 @@ const getFileHelper = async (file: FFModel.File, id: string) => {
     if (!file) {
         throw createHttpError(404, "File not found");
     }
-
-    const fileMeta = await FFModel.uploadMetaModel.find({ filename: file.fileMeta });
-    if (!fileMeta) {
-        throw createHttpError(404, "File content missing");
-    }
-    const fileContents = await FFModel.chunkModel.find({ files_id: fileMeta[0]._id });//.sort("-postDate")
+    const fileContents = await FFModel.chunkModel.find({ files_id: file.chunkId}).lean();//.sort("-postDate") /// Lean Update
     if (!fileContents[0].data) {
         throw createHttpError(404, "File data missing in Chunk");
     }
@@ -161,6 +163,7 @@ const getFileHelper = async (file: FFModel.File, id: string) => {
         objectType: file.objectType,
         title: file.title,
         fileContent: fileContents[0].data,
+        mimeType: file.mimeType
     };
     return resultFileData;
 }
@@ -219,7 +222,7 @@ export const GetFileFromParent: RequestHandler = async (req, res, next) => {
             throw createHttpError(400, "Invalid file id");
         }
         console.log("run GetFileFromParent");
-        const result = await GetFileFromParentHelper(parentId, next);
+        const result = await GetFileFromParentHelperLean(parentId, next);
         // const result = await CacheFileFromParent(parentId, next);
         res.status(200).json(result);
     } catch (error) {
@@ -271,24 +274,35 @@ export const GetFileFromParentHelper = async (parentId: string, next: NextFuncti
     }
 }
 
-/* 
-export const deleteFile: RequestHandler = async (req, res, next) => {
-    const objectId = req.params.objectId;
+export const GetFileFromParentHelperLean = async (parentId: string, next: NextFunction) => { /// Lean Update
+    const cache = await getCache();
     try {
-        if (!isValidObjectId(objectId)) {
-            throw createHttpError(400, "Invalid note id");
+        if (!isValidObjectId(parentId)) {
+            throw createHttpError(400, "Invalid file id");
         }
-        const file = await FFModel.FileModel.findById((objectId));
-        if (!file) {
-            throw createHttpError(404, "File not found");
+        const leanSubFileCursorObject = await FFModel.BaseModel.find({ parentId: parentId }).lean();
+        const result = [];
+        for(let index = 0; index < leanSubFileCursorObject.length; index++)
+        {
+            const curDoc = leanSubFileCursorObject[index];
+            if(curDoc.objectType == 'FOLDER'){
+                result.push(curDoc);
+            }else{
+                const fileResult = await getFileHelper(<FFModel.File>curDoc, curDoc._id.toString());
+                result.push(fileResult);
+            }
         }
-        await deleteFileHelper(file);
-        res.sendStatus(204);
+        console.log("save FileFromParent result to redis");
+        // console.log("result[]: " + result);
+        cache.set(parentId + "FileFromParent", JSON.stringify(result), {
+            EX: 300,
+            NX: true,
+        });
+        return result;
     } catch (error) {
         next(error);
     }
 }
- */
 
 const deleteFile = async (file: FFModel.File) => {
     if (!file) {
@@ -305,6 +319,7 @@ const deleteFile = async (file: FFModel.File) => {
     fileMeta[0].remove();
     return
 };
+
 
 const deleteFolder = async (parentId: string) => {
 
@@ -323,9 +338,11 @@ const deleteFolder = async (parentId: string) => {
     }
 }
 
+
 interface DeleteItemBody {
     objectId: string
 }
+
 
 export const deleteItem: RequestHandler<unknown, unknown, DeleteItemBody, unknown> = async (req, res, next) => {
     // TODO: Authentication
@@ -352,32 +369,6 @@ export const deleteItem: RequestHandler<unknown, unknown, DeleteItemBody, unknow
     }
 }
 
-// export const CacheFileFromParent  = async (parentId: string, next: NextFunction) => {
-//     const cache = await getCache();
-//     try {
-//         if (!isValidObjectId(parentId)) {
-//             throw createHttpError(400, "Invalid file id");
-//         }
-//         // const subFileResult = await cache.get(parentId + "FileFromParent");
-//         const subFileResult = await cache.get(parentId + "FileFromParent");
-//         console.log("mongodb or redis?");
-//         if (subFileResult) {
-//         console.log("get subFileResult from redis");
-
-//         const result = JSON.parse(subFileResult);
-//         // console.log("result[]: " + result);
-//         return result;
-//         return {}; } else {
-//             console.log("get FileFromParent from mongodb");
-
-//             return await GetFileFromParentHelper(parentId, next);
-//         }
-
-//     } catch (error) {
-//         next(error);
-//     }
-// }
-
 
 // get fileData from redis
 export const GetFileFromParentCached: RequestHandler = async (req, res, next) => {
@@ -399,10 +390,12 @@ export const GetFileFromParentCached: RequestHandler = async (req, res, next) =>
     }
 }
 
+
 interface RenameItemBody {
     objectId?: string
     title?: string
 }
+
 
 export const renameItem: RequestHandler<unknown, unknown, RenameItemBody, unknown> = async (req, res, next) => {
     const { objectId: objectId, title: title } = req.body;
@@ -421,11 +414,13 @@ export const renameItem: RequestHandler<unknown, unknown, RenameItemBody, unknow
     }
 }
 
+
 // TODO: create new folders with the response
 interface getOpenaiResponseBody {
     title?: string,
     description?: string
 }
+
 
 export const getOpenaiResponse: RequestHandler<unknown, unknown, getOpenaiResponseBody, unknown> = async (req, res, next) => {
     const { title: title, description: description } = req.body

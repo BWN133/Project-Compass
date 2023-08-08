@@ -24,6 +24,9 @@ const fileSchema = new Schema({
     parentId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID) },
     objectType: { type: String },
     fileMeta: { type: String },
+    chunkId: {type: Schema.Types.ObjectId},
+    fileSize: {type: Number},
+    mimeType: {type: String}
 }, baseOptions);
 
 const fileMetaSchema = new Schema({ filename: { type: String } }, { collection: 'uploads.files' });

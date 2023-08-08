@@ -24,7 +24,10 @@ export interface FolderInput {
     fileContent?: string,
     parentId: string
 }
-
+export async function deleteAll(): Promise<FFModel[]> {
+    const response = await fetchDataWrapper("/api/FF", { method: "DELETE" });
+    return response.json();
+}
 export async function fetchFolder(): Promise<FFModel[]> {
     const response = await fetchDataWrapper("/api/FF", { method: "GET" });
     return response.json();

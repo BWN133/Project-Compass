@@ -78,7 +78,15 @@ const HomePage = () => {
         }
         updateShowButtons();
     }
-
+    function base64ToUint8Array(base64: string) {
+        const binaryString = window.atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes;
+    }
     function onInputDialogSubmit(newFFModel: FFModel) { // currently the dialog persists for "newProject" mode because this function is not called
         setDialogMode(null);
         selectedItemIds.current = new Set();
@@ -125,6 +133,10 @@ const HomePage = () => {
         setShowCheckbox(false);
     }
 
+    async function deleteAllClicked(){
+        await dataApi.deleteAll();
+    }
+
     const folderGrid =
         <Row xs={1} md={2} xl={3} className={`g-4 ${styles.notesGrid}`} style={{ marginTop: "20px" }}>
             {DataModel.FFDataModel.map(FF => (
@@ -144,17 +156,17 @@ const HomePage = () => {
                             for (let index = 0; index < DataModel.FFDataModel.length; index++) {
                                 const currentModel = DataModel.FFDataModel[index];
                                 if (currentModel._id === downloadFileId) {
-                                    const arrayBuffer = new Uint8Array(currentModel.fileContent.buffer.data).buffer;
-                                    const mimeType = currentModel.fileContent.buffer.type;
-                                    const blob = new Blob([arrayBuffer], { type: mimeType });
+                                    const mimeType = currentModel.mimeType;
+                                    const inputUnit8 = base64ToUint8Array(currentModel.fileContent);
+                                    const blob = new Blob([inputUnit8], { type: mimeType });
                                     const fileDownloadUrl = URL.createObjectURL(blob);
                                     let a = document.createElement('a');
                                     a.href = fileDownloadUrl;
                                     a.download = currentModel.title;
                                     a.click();
-                                    break;
-                                }
-                            }
+                                   break;
+                               }
+                           }
                         }}
                     />
                 </Col>
@@ -180,7 +192,7 @@ const HomePage = () => {
             }}> Select Item(s) </ Button>
             {showButtons.delete && <Button onClick={() => onDeleteClicked()}> Delete </ Button>}
             {showButtons.rename && <Button onClick={() => setDialogMode('rename')}> Rename </ Button>}
-
+            <Button onClick={() => deleteAllClicked()}>Delete All </Button>
             {dialogMode && <InputDialog
                 onDismiss={() => setDialogMode(null)}
                 onSubmit={onInputDialogSubmit}

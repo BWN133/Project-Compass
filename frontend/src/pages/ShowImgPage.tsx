@@ -19,7 +19,8 @@ const ShowImgPage = () => {
                 if (imgId === 'imgShow') throw new ReferenceError('imgId not Found');
                 // TODO: This data can be acquired from homePage DataModel as it should already been acquired
                 const file = await dataApi.fetchFileById(imgId);
-                setImg(Buffer.from(file.fileContent.buffer.data).toString('base64'));
+                // setImg(Buffer.from(file.fileContent.buffer.data).toString('base64'));
+                setImg(file.fileContent);   /// Lean Update
                 console.log("successfully setted image");
             } catch (error) {
                 console.error(error);

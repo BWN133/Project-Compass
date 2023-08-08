@@ -8,12 +8,13 @@ export interface BufferType {
 export interface FF {
     _id: string,
     title: string,
-    fileContent: BufferType,
+    fileContent: string,
     createdAt?: string,
     updatedAt?: string,
     parentId: string,
     objectType?: string,
-    __type: string
+    __type: string,
+    mimeType: string
 }
 
 

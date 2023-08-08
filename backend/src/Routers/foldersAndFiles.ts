@@ -7,10 +7,11 @@ const router = express.Router();
 
 const storage = new GridFsStorage({
     url: env.MONGO_CONNECTION_STRING,
+    // options: { useNewUrlParser: true, useUnifiedTopology: true },
     file: (req, file) => {
         return new Promise((resolve, reject) => {
             const fileInfo = {
-                bucketName: 'uploads'
+                bucketName: 'uploads',
             };
             resolve(fileInfo);
         });
@@ -38,7 +39,6 @@ router.delete("/folder", FFController.deleteItem);
 
 router.delete("/", FFController.DeleteAll);
 
-router.delete("/");
 
 router.patch("/folder", FFController.renameItem);
 
