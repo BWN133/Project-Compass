@@ -4,6 +4,15 @@ import UserModel from "../models/user";
 import bcrypt from "bcrypt";
 import session from 'express-session';
 
+export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
+    try {
+        const user = await UserModel.findById(req.session.userId).select("+email").exec();
+        res.status(200).json(user);
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 interface SignUpBody {
     username?: string,

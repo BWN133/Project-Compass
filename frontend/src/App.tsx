@@ -13,15 +13,50 @@ import NotFoundPage from './pages/NotFoundPage';
 import TestPage2 from './pages/TestPage2';
 import HomePage from './pages/HomePage';
 import ShowImgPage from './pages/ShowImgPage';
+import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
+import { User } from './models/user';
 
-
+import SignUpModal from './component/SignUpModal';
+import LoginModal from './component/Auth';
+import * as TodoApi from "./network/todo_api";
 
 function App() {
   console.log("HHHHHH");
+  const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
+
+  const [showSignUpModal, setShowSignUpModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  useEffect(() => {
+    async function fetchLoggedInUser() {
+      try {
+        console.log("11111111111");
+        const user = await TodoApi.getLoggedInUser();
+        console.log("2222222222222222");
+        setLoggedInUser(user);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchLoggedInUser();
+  }, []);
+
   return (
 
     <BrowserRouter>
-      <NavBar />
+
+    <NavBar
+        loggedInUser={loggedInUser}
+        onLoginClicked={() => setShowLoginModal(true)}
+        onSignUpClicked={() => setShowSignUpModal(true)}
+        onLogoutSuccessful={() => {
+          setLoggedInUser(null)
+          window.location.href = "http://localhost:3000/";
+        }
+
+        }    
+          />
       <Container className={styles.pageContainer}>
         <Routes>
           <Route
@@ -39,22 +74,50 @@ function App() {
 
           <Route
             path='/'
-            element={<HomePage/>}
+            element={<LoginPage />}
+          />
+
+          <Route
+            path='/home'
+            element={<HomePage />}
+          />
+
+          <Route
+            path='/signup'
+            element={<SignUpPage />}
           />
 
           <Route
             path='/folder/*'
-            element={<HomePage/>
-          }
+            element={<HomePage />
+            }
           />
 
           <Route
-          path='/imgShow/*'
-          element={<ShowImgPage/>}
+            path='/imgShow/*'
+            element={<ShowImgPage />}
           />
 
         </Routes>
       </Container>
+      {/* {showSignUpModal &&
+          <SignUpModal
+            onSignUpSuccessful={(user) => {
+              setLoggedInUser(user);
+              setShowSignUpModal(false);
+            }}
+          />
+        }
+        {showLoginModal &&
+          <LoginModal
+            onDismiss={() => setShowLoginModal(false)}
+            onLoginSuccessful={(user) => {
+              setLoggedInUser(user);
+              setShowLoginModal(false);
+              window.location.href = "http://localhost:3000/home";
+            }}
+          />
+        } */}
     </BrowserRouter>
 
   );

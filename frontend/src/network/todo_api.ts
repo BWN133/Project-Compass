@@ -1,5 +1,6 @@
 import { FF as FFModel } from "../models/data";
 import { ConflictError, UnauthorizedError } from "../errors/http_errors";
+import { User } from "../models/user";
 
 async function fetchDataWrapper(input: RequestInfo, init?: RequestInit) {
     const response = await fetch(input, init);
@@ -114,4 +115,51 @@ export async function createProject(title: string, description: any) {
     const message = await response.json();
     console.log(`In Frontend TODO Api successfully requested OpenAI API with the following response message:\n${message}`)
     // return response.json();
+}
+
+export async function getLoggedInUser(): Promise<User> {
+    console.log("get LoggedInUser 1");
+    const response = await fetchDataWrapper("http://localhost:8888/api/users/", { method: "GET" });
+    console.log("get LoggedInUser 2");
+    return response.json();
+}
+
+export interface SignUpCredentials {
+    username: string,
+    email: string,
+    password: string
+}
+
+export async function signUp(credentials: SignUpCredentials): Promise<User> {
+   
+    const response = await fetchDataWrapper("/api/users/signup",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(credentials),
+        });
+    return response.json();
+}
+
+export interface LoginCredentials {
+    username: string,
+    password: string,
+}
+
+export async function login(credentials: LoginCredentials): Promise<User> {
+    const response = await fetchDataWrapper("/api/users/login",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(credentials),
+        });
+    return response.json();
+}
+
+export async function logout() {
+    await fetchDataWrapper("/api/users/logout", { method: "POST" });
 }
