@@ -3,7 +3,7 @@
 }
 
 .sidebarWrapper {
-    position: absolute;
+    position: fixed;
     height: 100vh;
     left: 0;
   }

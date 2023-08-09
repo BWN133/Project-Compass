@@ -170,24 +170,13 @@ const HomePage = () => {
                                }
                            }
                         }}
+                        subject="CS"
                     />
                 </Col>
             ))}
         </Row>
     return (
         <>
-            {/* <Button onClick={() => { window.location.href = "http://localhost:3000/" }}> Home </ Button>
-            <Button onClick={() => setDialogMode('newProject')}> Create Project </Button>
-            <Button onClick={() => setDialogMode('newFolder')}> Add Folder </Button>
-            <Button onClick={() => setDialogMode('newFile')}> Add File </Button>
-            <Button onClick={() => {
-                if (showCheckbox) {
-                    selectedItemIds.current = new Set();
-                    updateShowButtons();
-                }
-                setShowCheckbox(!showCheckbox);
-            }}> Select Item(s) </ Button> */}
-            {/* <Button onClick={() => deleteAllClicked()}>Delete All </Button> */}
             <Row>
             <Col xs={3} className="p-0">
             {/* This section is approximately 20% of the screen width */}

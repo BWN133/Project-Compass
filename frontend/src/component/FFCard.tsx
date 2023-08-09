@@ -4,7 +4,9 @@ import styles from "../style/FFCard.module.css";
 import { Card, Form, Button } from "react-bootstrap";
 import { FF as FFModel } from "../models/data";
 import logo from '../staticSrc/logo512.png';
-
+import hisLogo from '../staticSrc/History.jpeg';
+import econLogo from '../staticSrc/economics.jpeg';
+import csLogo from '../staticSrc/CS.jpeg';
 interface FFCardProps {
     FFContent: FFModel,
     onclicked: (ffInput: string, objectType: string) => void,
@@ -12,6 +14,7 @@ interface FFCardProps {
     className?: string,
     handleCheckboxClick: (deletefile: string, isChecked: boolean) => void,
     handleDownloadClick: (downloadFileID: string) => void,
+    subject?: string
 }
 
 const FFCard = ({
@@ -20,7 +23,8 @@ const FFCard = ({
     className,
     showCheckBox,
     handleCheckboxClick,
-    handleDownloadClick
+    handleDownloadClick,
+    subject
 }: FFCardProps) => {
     const {
         _id,
@@ -33,7 +37,8 @@ const FFCard = ({
         __type,
     } = FFContent;
     const strObjecType: string = objectType ? objectType : "FOLDER";
-    const checkForm = <Form>
+    const checkForm = <div>
+    <Form >
         <Form.Check
             type="checkbox"
             defaultChecked={false}
@@ -44,12 +49,27 @@ const FFCard = ({
             }}
         />
     </Form>
+    </div>
 
     const previewButton = <Button variant="primary" onClick={(e) => {
         onclicked(FFContent._id, strObjecType);
         e.stopPropagation();
 
     }}>preview</Button>;
+    let cardImg = logo;
+    if(subject === "ECON"){
+        cardImg = econLogo;
+    }
+    if(subject === "HIS"){
+        cardImg = hisLogo;
+    }
+    if(subject === "CS"){
+        cardImg = csLogo;
+    }
+    const description =  <Card.Text>
+    Some quick example text to build on the card title and make up the
+    bulk of the card's content.
+    </Card.Text>
     // console.log("FFCard recieved constant with data: title: ", title, " \n objectType", objectType, "fileContent: ", fileContent, "\n updated at: ", updatedAt);
     return (
         <Card
@@ -65,7 +85,7 @@ const FFCard = ({
                 }
             }}
         >
-            <Card.Img variant="top" src={logo} style={{height:'70px',objectFit: 'cover'}}/>
+            <Card.Img variant="top" src={cardImg} style={{height:'70px',objectFit: 'cover'}}/>
             {/* <Card.Body className={styles.cardBody}> */}
             <Card.Body>
                 <div className={styles.cardBody}>
@@ -75,6 +95,7 @@ const FFCard = ({
                 </Card.Title>
                 {showCheckBox && checkForm}
                 </div>
+                {(strObjecType === "FOLDER") && description}
                 {/* <Button onClick={() => onclicked(FFContent._id, strObjecType)}>preview</Button> */}
                 {(strObjecType !== "FOLDER") && previewButton}
             </Card.Body>
