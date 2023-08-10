@@ -85,33 +85,73 @@ export async function uploadItem(title: string, parentId: string, fileType: stri
     }
     let response = null;
     if (fileType === 'folder') {
-        response = await fetchDataWrapper("/api/FF/" + fileType,
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(inputData),
-            });
+        response = await fetchDataWrapper("/api/FF/" + fileType, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(inputData),
+        });
     } else {
         const image = inputContent ? inputContent : "None \n";
         const formData = new FormData();
         formData.append('fileContent', image);
         formData.append('parentId', parentId);
-        response = await fetchDataWrapper("/api/FF/" + fileType,
-            {
-                method: "POST",
-                body: formData,
-            });
+        response = await fetchDataWrapper("/api/FF/" + fileType, {
+            method: "POST",
+            body: formData,
+        });
     }
     return response.json();
 }
 
-// TODO: return the new project created
+async function createTxt(name: string, content: string, parentId: string): Promise<FFModel> {
+    const encoder = new TextEncoder(); // built-in in most modern browsers and Node.js
+    const uint8Array = encoder.encode(content);
+    const blob = new Blob([uint8Array.buffer], { type: 'text/plain' });
+
+    // Create a form with the file
+    const form = new FormData();
+    form.append('fileContent', blob, name);
+    form.append('parentId', parentId);
+    const response = await fetchDataWrapper("/api/FF/file", {
+        method: "POST",
+        body: form,
+    });
+    return response.json();
+}
+
+interface TaskInfo {
+    name: string,
+    description: string,
+    challenges: string,
+    resources: string,
+    tools: string
+}
+
+async function createTask(taskInfo: TaskInfo, parentId: string): Promise<FFModel> {
+    const { name, description } = taskInfo
+    let { challenges, resources, tools } = taskInfo
+    const newTask = await uploadItem(name, parentId, "folder");
+    const currentId = newTask._id
+    challenges = challenges !== "None" ? `Possible challenges:\n${challenges}\n` : ""
+    resources = resources !== "None" ? `The following resources might be helpful:${resources}` : ""
+    tools = tools !== "None" ? `Some possibly helpful tools:\n${tools}` : ""
+
+    const overviewPromise = createTxt('Overview', `Task Description: ${description}\n\n${challenges}`, currentId)
+    const arsenalPromise = createTxt('Arsenal', `${resources}\n\n${tools}`, currentId)
+
+    await Promise.all([overviewPromise, arsenalPromise])
+
+    return newTask;
+}
+
 export async function createProject(title: string, description: any) {
-    const response = await fetchDataWrapper("/api/FF/openai", {
+    const responsePromise = fetchDataWrapper("/api/FF/openai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: title, description: description }),
     })
+    const newProjectPromise = uploadItem(title, "6348acd2e1a47ca32e79f46f", "folder")
+    const [response, newProject] = await Promise.all([responsePromise, newProjectPromise])
     const message = await response.json();
     console.log(`In Frontend TODO Api successfully requested OpenAI API with the following response message:\n${message}`)
     // return response.json();

@@ -1,8 +1,8 @@
 import { Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
-import * as todoApi from '../network/todo_api';
-import { FF as FFModel } from '../models/data';
-import TextInputField from './form/TextInputField';
+import * as todoApi from "../network/todo_api";
+import { FF as FFModel } from "../models/data";
+import TextInputField from "./form/TextInputField";
 
 
 interface InputDialogProps {
@@ -15,19 +15,20 @@ interface InputDialogProps {
 // another name might make more sense
 export default function InputDialog({ onDismiss, onSubmit, mode, Id }: InputDialogProps) {
     const boxTitleDictByMode: { [mode: string]: string } = {
-        'newFolder': 'Add Folder',
-        'newFile': 'Add File',
-        'rename': 'Rename'
+        "newProject": "Create Project",
+        "newFolder": "Create Folder",
+        "newFile": "Upload File",
+        "rename": "Rename"
     }
-    let defaultTitle = '';
+    let defaultTitle = "";
 
     // to be inplemented
     /* async function setDefaultTitle() {
-        if (mode === 'rename') {
+        if (mode === "rename") {
             const item = await todoApi.fetchItemById(Id);
             return item.title;
         }
-        return '';
+        return "";
     }
     setDefaultTitle() */
 
@@ -41,17 +42,17 @@ export default function InputDialog({ onDismiss, onSubmit, mode, Id }: InputDial
         const { title: title, description: description } = input;
         try {
             let resFF = null;
-            if (mode === 'newFolder') {
-                resFF = await todoApi.uploadItem(title, Id, 'folder');
-            } else if (mode === 'newFile') {
+            if (mode === "newFolder") {
+                resFF = await todoApi.uploadItem(title, Id, "folder");
+            } else if (mode === "newProject") {
+                resFF = await todoApi.createProject(title, description);
+            } else if (mode === "newFile") {
                 if (!input.fileContent) throw console.error();
-                resFF = await todoApi.uploadItem(title, Id, 'file', input.fileContent[0]);
-            } else if (mode === 'rename') {
+                resFF = await todoApi.uploadItem(title, Id, "file", input.fileContent[0]);
+            } else {
                 resFF = await todoApi.renameItemById(Id, title);
-            } else { // TODO: store the return value
-                await todoApi.createProject(title, description)
             }
-            if (resFF) onSubmit(resFF);
+            onSubmit(resFF);
         } catch (error) {
             console.error(error);
             alert(error);
@@ -95,9 +96,9 @@ export default function InputDialog({ onDismiss, onSubmit, mode, Id }: InputDial
 
             <Modal.Body>
                 <Form id="addEditNoteForm" onSubmit={handleSubmit(onFormSubmit)}>
-                    {(mode === 'newFile') ? fileInputField : nameInputField}
+                    {(mode === "newFile") ? fileInputField : nameInputField}
                     {/* TODO: create a new component with larger text area */}
-                    {(mode === 'newProject') && descriptionInputField}
+                    {(mode === "newProject") && descriptionInputField}
                 </Form>
             </Modal.Body>
             <Modal.Footer>

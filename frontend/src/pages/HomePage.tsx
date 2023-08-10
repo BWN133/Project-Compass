@@ -1,16 +1,16 @@
-import { useEffect, useState, useRef } from 'react';
-import { Container, Button, Col, Row, Spinner , Offcanvas} from 'react-bootstrap';
-// import { Link, useNavigate, useRouteMatch} from 'react-router-dom';
-import { Link, useNavigate } from 'react-router-dom';
-import * as dataApi from '../network/todo_api';
+import { useEffect, useState, useRef } from "react";
+import { Container, Button, Col, Row, Spinner, Offcanvas } from "react-bootstrap";
+// import { Link, useNavigate, useRouteMatch} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import * as dataApi from "../network/todo_api";
 import styles from "../style/NotesPage.module.css";
 import stylesS from "../style/App.module.css";
-import FFCard from '../component/FFCard';
+import FFCard from "../component/FFCard";
 import { FF as FFModel } from "../models/data";
-import ShowImgPage from './ShowImgPage';
-import { useNavigation } from '../network/Navigate';
-import InputDialog from '../component/DialogBox';
-import SideNav from '../component/SideNav';
+import ShowImgPage from "./ShowImgPage";
+import { useNavigation } from "../network/Navigate";
+import InputDialog from "../component/DialogBox";
+import SideNav from "../component/SideNav";
 interface DataModelOrImage {
     FFDataModel: FFModel[],
     displayImage: boolean,
@@ -38,12 +38,12 @@ const HomePage = () => {
     useEffect(() => {
         async function loadNotes() {
             const currentPath = window.location.pathname;
-            const segments = currentPath.split('/');
+            const segments = currentPath.split("/");
             const parentId = (segments.length === 2) ? "6348acd2e1a47ca32e79f46f" : segments[segments.length - 1];
             currentParentId.current = parentId;
             console.log("current segment length:", segments.length);
             try {
-                if (segments.length === 2 || segments[segments.length - 2] === 'folder') {
+                if (segments.length === 2 || segments[segments.length - 2] === "folder") {
                     const Folders = await dataApi.fetchFolderByParentId(parentId);
 
                     setDataModel({
@@ -89,17 +89,14 @@ const HomePage = () => {
         }
         return bytes;
     }
-    function onInputDialogSubmit(newFFModel: FFModel) { // currently the dialog persists for "newProject" mode because this function is not called
+    function onInputDialogSubmit(newFFModel: FFModel) {
         setDialogMode(null);
         selectedItemIds.current = new Set();
         updateShowButtons();
 
-        // TODO: remove this line
-        if (dialogMode === 'newProject') return
-
         let newFFDataModel = [...DataModel.FFDataModel]
 
-        if (dialogMode === 'rename') {
+        if (dialogMode === "rename") {
             for (let i = 0; i < newFFDataModel.length; i++) {
                 if (newFFDataModel[i]._id === newFFModel._id) {
                     newFFDataModel[i] = newFFModel;
@@ -135,7 +132,7 @@ const HomePage = () => {
         setShowCheckbox(false);
     }
 
-    async function deleteAllClicked(){
+    async function deleteAllClicked() {
         await dataApi.deleteAll();
     }
 
@@ -147,7 +144,7 @@ const HomePage = () => {
                         FFContent={FF}
                         onclicked={(updatedParentId: string, objectType: string) => {
                             console.log("Objectype recieved is: ", objectType);
-                            if (objectType === 'FOLDER') navigate(`/folder/${updatedParentId}`);
+                            if (objectType === "FOLDER") navigate(`/folder/${updatedParentId}`);
                             else navigate(`/imgShow/${updatedParentId}`);
                         }}
                         showCheckBox={showCheckbox}
@@ -162,13 +159,13 @@ const HomePage = () => {
                                     const inputUnit8 = base64ToUint8Array(currentModel.fileContent);
                                     const blob = new Blob([inputUnit8], { type: mimeType });
                                     const fileDownloadUrl = URL.createObjectURL(blob);
-                                    let a = document.createElement('a');
+                                    let a = document.createElement("a");
                                     a.href = fileDownloadUrl;
                                     a.download = currentModel.title;
                                     a.click();
-                                   break;
-                               }
-                           }
+                                    break;
+                                }
+                            }
                         }}
                         subject="CS"
                     />
@@ -178,42 +175,45 @@ const HomePage = () => {
     return (
         <>
             <Row>
-            <Col xs={3} className="p-0">
-            {/* This section is approximately 20% of the screen width */}
-            <div className={`${stylesS.sidebarWrapper}`}>
-            <SideNav 
-                CreateFolderOnclicked={() => setDialogMode('newFolder')}
-                CreateFileOnclicked={() => setDialogMode('newFile')}
-                SeleteItemOnclicked={() => {
-                    if (showCheckbox) {
-                        selectedItemIds.current = new Set();
-                        updateShowButtons();
-                    }
-                    setShowCheckbox(!showCheckbox);
-                }}
-                DeleteAllOnclicked={() => deleteAllClicked()}
-            />
-            </div>
-            </Col>
-            <Col xs={9}>
-            {showButtons.delete && <Button onClick={() => onDeleteClicked()}> Delete </ Button>}
-            {showButtons.rename && <Button onClick={() => setDialogMode('rename')}> Rename </ Button>}
-            {/* This section is approximately 80% of the screen width */}
-            {dialogMode && <InputDialog
-                onDismiss={() => setDialogMode(null)}
-                onSubmit={onInputDialogSubmit}
-                mode={dialogMode}
-                // if rename, use the only selected item id
-                Id={
-                    (dialogMode === 'rename') ?
-                        selectedItemIds.current.values().next().value :
-                        currentParentId.current
-                }
-            />}
-            {!DataModel.displayImage && DataModel.FFDataModel && folderGrid}
-            {DataModel.displayImage && <ShowImgPage />}
-            </Col>
-        </Row>
+                <Col xs={3} className="p-0">
+                    {/* This section is approximately 20% of the screen width */}
+                    <div className={`${stylesS.sidebarWrapper}`}>
+                        <SideNav
+                            CreateFolderOnclicked={() => setDialogMode(
+                                (currentParentId.current === "6348acd2e1a47ca32e79f46f") ?
+                                    "newProject" : "newFolder"
+                            )}
+                            CreateFileOnclicked={() => setDialogMode("newFile")}
+                            SeleteItemOnclicked={() => {
+                                if (showCheckbox) {
+                                    selectedItemIds.current = new Set();
+                                    updateShowButtons();
+                                }
+                                setShowCheckbox(!showCheckbox);
+                            }}
+                            DeleteAllOnclicked={() => deleteAllClicked()}
+                        />
+                    </div>
+                </Col>
+                <Col xs={9}>
+                    {showButtons.delete && <Button onClick={() => onDeleteClicked()}> Delete </ Button>}
+                    {showButtons.rename && <Button onClick={() => setDialogMode("rename")}> Rename </ Button>}
+                    {/* This section is approximately 80% of the screen width */}
+                    {dialogMode && <InputDialog
+                        onDismiss={() => setDialogMode(null)}
+                        onSubmit={onInputDialogSubmit}
+                        mode={dialogMode}
+                        // if rename, use the only selected item id
+                        Id={
+                            (dialogMode === "rename") ?
+                                selectedItemIds.current.values().next().value :
+                                currentParentId.current
+                        }
+                    />}
+                    {!DataModel.displayImage && DataModel.FFDataModel && folderGrid}
+                    {DataModel.displayImage && <ShowImgPage />}
+                </Col>
+            </Row>
         </>);
 }
 
