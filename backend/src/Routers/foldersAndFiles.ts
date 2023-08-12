@@ -27,6 +27,7 @@ router.post("/folder", FFController.createFolder);
 
 router.post("/file", upload.single('fileContent'), FFController.createFile);
 
+// router.post("/files", upload.array('filesContent'), FFController.createMultipleFiles);
 // router.get("/folder/:parentId", FFController.GetFileFromParentCached, FFController.GetFileFromParent);
 
 router.get("/folder/:parentId", FFController.GetFileFromParent);

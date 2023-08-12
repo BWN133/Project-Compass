@@ -71,6 +71,21 @@ interface CreateFileBody {
     parentId?: string,
 }
 
+interface CreateFilesBody {
+    parentIds?: string[]
+}
+
+
+
+export const createMultipleFiles: RequestHandler<unknown, unknown, CreateFileBody, unknown> = async (req, res, next) => {
+    //TODO:  Authentication
+    // const cache = await getCache()
+
+    const parentId = req.body.parentId;
+    console.log(req.files);
+
+};
+
 export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknown> = async (req, res, next) => {
     //TODO:  Authentication
     // const cache = await getCache()

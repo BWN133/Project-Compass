@@ -8,12 +8,13 @@ import TextInputField from "./form/TextInputField";
 interface InputDialogProps {
     onDismiss: () => void,
     onSubmit: (inputModel: FFModel) => void,
+    inputSetProgressBar?: (input: number) => void,
     mode: string,
     Id: string, // parent id or current id depending on mode
 }
 
 // another name might make more sense
-export default function InputDialog({ onDismiss, onSubmit, mode, Id }: InputDialogProps) {
+export default function InputDialog({ onDismiss, onSubmit, mode, Id, inputSetProgressBar}: InputDialogProps) {
     const boxTitleDictByMode: { [mode: string]: string } = {
         "newProject": "Create Project",
         "newFolder": "Create Folder",
@@ -44,7 +45,8 @@ export default function InputDialog({ onDismiss, onSubmit, mode, Id }: InputDial
             let resFF = null;
             if (mode === "newFolder") {
                 resFF = await todoApi.uploadItem(title, Id, "folder");
-            } else if (mode === "newProject") {
+            } else if (mode === "newProject" && inputSetProgressBar) {
+                inputSetProgressBar(100);
                 resFF = await todoApi.createProject(title, description);
             } else if (mode === "newFile") {
                 if (!input.fileContent) throw console.error();

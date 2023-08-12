@@ -74,7 +74,7 @@ const FFCard = ({
     return (
         <Card
             className={`${styles.noteCard}` }
-            style={{ width: '20rem' }}
+            style={{ width: '30rem' }}
             onClick={(e) => {
                 if (strObjecType === "FOLDER") {
                     onclicked(FFContent._id, strObjecType);
@@ -94,24 +94,14 @@ const FFCard = ({
                     {FFContent.title}
                 </Card.Title>
                 {showCheckBox && checkForm}
+                {(strObjecType !== "FOLDER") && previewButton}
                 </div>
                 {(strObjecType === "FOLDER") && description}
                 {/* <Button onClick={() => onclicked(FFContent._id, strObjecType)}>preview</Button> */}
-                {(strObjecType !== "FOLDER") && previewButton}
+               
             </Card.Body>
         </Card>)
 }
 
 
-{/* <Card style={{ width: '18rem' }}>
-<Card.Img variant="top" src="holder.js/100px180" />
-<Card.Body>
-  <Card.Title>Card Title</Card.Title>
-  <Card.Text>
-    Some quick example text to build on the card title and make up the
-    bulk of the card's content.
-  </Card.Text>
-  <Button variant="primary">Go somewhere</Button>
-</Card.Body>
-</Card> */}
 export default FFCard;

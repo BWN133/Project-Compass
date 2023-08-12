@@ -153,8 +153,13 @@ export async function createProject(title: string, description: any) {
     const newProjectPromise = uploadItem(title, "6348acd2e1a47ca32e79f46f", "folder")
     const [response, newProject] = await Promise.all([responsePromise, newProjectPromise])
     const message = await response.json();
-    console.log(`In Frontend TODO Api successfully requested OpenAI API with the following response message:\n${message}`)
-    // return response.json();
+    console.log(message)
+    const tasks = JSON.parse(message).tasks
+    Promise.all(tasks.map(async (taskInfo: TaskInfo) => {
+        await createTask(taskInfo, newProject._id)
+    }))
+    console.log(`In Frontend TODO Api successfully requested OpenAI API with the following response message:\n${message}`);
+    return newProject;
 }
 
 export async function getLoggedInUser(): Promise<User> {

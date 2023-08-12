@@ -11,6 +11,7 @@ import ShowImgPage from "./ShowImgPage";
 import { useNavigation } from "../network/Navigate";
 import InputDialog from "../component/DialogBox";
 import SideNav from "../component/SideNav";
+import ProgressBar from 'react-bootstrap/ProgressBar';
 interface DataModelOrImage {
     FFDataModel: FFModel[],
     displayImage: boolean,
@@ -28,6 +29,7 @@ const HomePage = () => {
         FFDataModel: [],
         displayImage: false,
     });
+    const [progressBarPercent, setProgressBar] = useState(0);
     const [showButtons, setShowButtons] = useState<ButtonStates>({
         delete: false,
         rename: false
@@ -63,6 +65,9 @@ const HomePage = () => {
         loadNotes();
     }, [navigate]);
 
+    useEffect(() => {
+        console.log("current Progress bar percent!!!!!!!!!!!:", progressBarPercent)
+    },[progressBarPercent]);
     function updateShowButtons() {
         const selectionCount = selectedItemIds.current.size;
         const newShowButtons = { ...showButtons };
@@ -90,10 +95,8 @@ const HomePage = () => {
         return bytes;
     }
     function onInputDialogSubmit(newFFModel: FFModel) {
-        setDialogMode(null);
         selectedItemIds.current = new Set();
         updateShowButtons();
-
         let newFFDataModel = [...DataModel.FFDataModel]
 
         if (dialogMode === "rename") {
@@ -106,11 +109,12 @@ const HomePage = () => {
         } else {
             newFFDataModel.push(newFFModel);
         }
-
+        setDialogMode(null);
         setDataModel({
             FFDataModel: newFFDataModel,
             displayImage: DataModel.displayImage
         });
+        setProgressBar(0);
     }
 
     async function onDeleteClicked() {
@@ -137,7 +141,7 @@ const HomePage = () => {
     }
 
     const folderGrid =
-        <Row xs={1} md={2} xl={3} className={`g-4 ${styles.notesGrid} ${stylesS.ContentWrapper}`} style={{ marginTop: "20px" }}>
+        <Row xs={1} md={1} xl={2} className={`g-4 ${styles.notesGrid} ${stylesS.ContentWrapper}`} style={{ marginTop: "20px" }}>
             {DataModel.FFDataModel.map(FF => (
                 <Col key={FF._id}>
                     <FFCard
@@ -178,7 +182,7 @@ const HomePage = () => {
                 <Col xs={3} className="p-0">
                     {/* This section is approximately 20% of the screen width */}
                     <div className={`${stylesS.sidebarWrapper}`}>
-                        <SideNav
+                        {progressBarPercent===0 && <SideNav
                             CreateFolderOnclicked={() => setDialogMode(
                                 (currentParentId.current === "6348acd2e1a47ca32e79f46f") ?
                                     "newProject" : "newFolder"
@@ -192,14 +196,14 @@ const HomePage = () => {
                                 setShowCheckbox(!showCheckbox);
                             }}
                             DeleteAllOnclicked={() => deleteAllClicked()}
-                        />
+                        />}
                     </div>
                 </Col>
                 <Col xs={9}>
                     {showButtons.delete && <Button onClick={() => onDeleteClicked()}> Delete </ Button>}
                     {showButtons.rename && <Button onClick={() => setDialogMode("rename")}> Rename </ Button>}
                     {/* This section is approximately 80% of the screen width */}
-                    {dialogMode && <InputDialog
+                    {dialogMode && progressBarPercent===0 && <InputDialog
                         onDismiss={() => setDialogMode(null)}
                         onSubmit={onInputDialogSubmit}
                         mode={dialogMode}
@@ -209,9 +213,15 @@ const HomePage = () => {
                                 selectedItemIds.current.values().next().value :
                                 currentParentId.current
                         }
+                        inputSetProgressBar={(input: number)=>{
+                            console.log("updating current:!!!!!!!!!!", progressBarPercent);
+                            setProgressBar(input);
+                        }
+                        }
                     />}
                     {!DataModel.displayImage && DataModel.FFDataModel && folderGrid}
                     {DataModel.displayImage && <ShowImgPage />}
+                    {progressBarPercent !== 0 && <ProgressBar animated now={progressBarPercent} label="We are preparing your project guide!!!"/>}
                 </Col>
             </Row>
         </>);
