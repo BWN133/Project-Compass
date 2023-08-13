@@ -124,24 +124,22 @@ interface TaskInfo {
     description: string,
     challenges: string,
     resources: string,
-    tools: string
+    tools: string,
+    _id?: string
 }
 
-async function createTask(taskInfo: TaskInfo, parentId: string): Promise<FFModel> {
-    const { name, description } = taskInfo
+async function populateTask(taskInfo: TaskInfo) {
+    const { description } = taskInfo
     let { challenges, resources, tools } = taskInfo
-    const newTask = await uploadItem(name, parentId, "folder");
-    const currentId = newTask._id
+    const currentId = taskInfo._id!
     challenges = challenges !== "None" ? `Possible challenges:\n${challenges}\n` : ""
-    resources = resources !== "None" ? `The following resources might be helpful:${resources}` : ""
+    resources = resources !== "None" ? `The following resources might be helpful:\n${resources}` : ""
     tools = tools !== "None" ? `Some possibly helpful tools:\n${tools}` : ""
 
     const overviewPromise = createTxt('Overview', `Task Description: ${description}\n\n${challenges}`, currentId)
     const arsenalPromise = createTxt('Arsenal', `${resources}\n\n${tools}`, currentId)
 
-    await Promise.all([overviewPromise, arsenalPromise])
-
-    return newTask;
+    return Promise.all([overviewPromise, arsenalPromise])
 }
 
 export async function createProject(title: string, description: any) {
@@ -155,17 +153,21 @@ export async function createProject(title: string, description: any) {
     const message = await response.json();
     console.log(message)
     const tasks = JSON.parse(message).tasks
-    Promise.all(tasks.map(async (taskInfo: TaskInfo) => {
-        await createTask(taskInfo, newProject._id)
-    }))
-    console.log(`In Frontend TODO Api successfully requested OpenAI API with the following response message:\n${message}`);
-    return newProject;
+    /* Promise.all(tasks.map(async (task: TaskInfo) => {
+        await createTask(task, newProject._id)
+    })) */
+    for (const taskInfo of tasks) {
+        const newTask = await uploadItem(taskInfo.name, newProject._id, "folder")
+        taskInfo._id = newTask._id
+    }
+    Promise.all(tasks.map(populateTask))
+    return newProject
 }
 
 export async function getLoggedInUser(): Promise<User> {
     console.log("get LoggedInUser 1");
     const response = await fetchDataWrapper("http://localhost:8888/api/users/", { method: "GET" });
-    console.log("get LoggedInUser 2");
+    console.log("get LoggedInUser 2")
     return response.json();
 }
 
@@ -176,7 +178,7 @@ export interface SignUpCredentials {
 }
 
 export async function signUp(credentials: SignUpCredentials): Promise<User> {
-   
+
     const response = await fetchDataWrapper("/api/users/signup",
         {
             method: "POST",
