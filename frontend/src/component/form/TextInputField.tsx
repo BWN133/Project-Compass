@@ -28,7 +28,8 @@ const TextInputField = ({ name, label, register, registerOptions, error, ...prop
                 {...props}
                 {...register(name, registerOptions)}
                 style={{
-                    width: '100%'
+                    width: '100%',
+                
                 }}
 
             ></textarea>
