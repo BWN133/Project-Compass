@@ -1,4 +1,4 @@
-import { AiFillFileImage, AiFillFilePdf, AiFillFileText, AiFillFolder, AiFillFolderOpen, AiFillGithub, AiOutlineFileText } from "react-icons/ai";
+import { AiFillFile, AiFillFileImage, AiFillFilePdf, AiFillFileText, AiFillFileWord, AiFillFolder, AiFillFolderOpen, AiFillGithub, AiFillGolden, AiFillProject, AiFillRobot, AiFillVideoCamera, AiOutlineFileText } from "react-icons/ai";
 import styleUtils from "../style/utils.module.css";
 import styles from "../style/FFCard.module.css";
 import { Card, Form, Button } from "react-bootstrap";
@@ -36,16 +36,16 @@ const FFCard = ({
         objectType,
         __type,
     } = FFContent;
-    
+
     const strObjecType: string = objectType ? objectType : "FOLDER";
     const checkForm = <div>
-    
+
         <Form >
             <Form.Check
-                  style={{
-                   position : 'absolute',
-                   left : '445px',
-                   backgroundColor : 'blue'
+                style={{
+                    position: 'absolute',
+                    left: '445px',
+                    backgroundColor: 'blue'
                 }}
                 type="checkbox"
                 defaultChecked={false}
@@ -57,7 +57,7 @@ const FFCard = ({
             />
         </Form>
     </div>
-
+    
     const previewButton = <Button
         style={{ float: 'right' }}
         variant="primary"
@@ -81,21 +81,27 @@ const FFCard = ({
         bulk of the card's content.
     </Card.Text>
     let newTitle;
-    if ( FFContent.title.length >= 20) {
-        newTitle = FFContent.title.substring(0,20) + "...";
+    if (FFContent.title.length >= 20) {
+        newTitle = FFContent.title.substring(0, 20) + "...";
     } else {
         newTitle = FFContent.title;
     }
     console.log("file type: " + FFContent.mimeType);
+    console.log("FFCard parentId: " + parentId);
     let fileType;
-    if (FFContent.mimeType === "image/jpeg") {
+    if (FFContent.mimeType === "image/jpeg" || FFContent.mimeType === "image/png") {
         fileType = "image";
     } else if (FFContent.mimeType === "text/plain") {
         fileType = "text";
-    } else if (FFContent.mimeType ===  "application/pdf") {
+    } else if (FFContent.mimeType === "application/pdf") {
         fileType = "pdf";
-    } else {
-        fileType = "folder";
+    } else if (FFContent.mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+        fileType = "word";
+    } else if (FFContent.mimeType === "video/mp4") {
+        fileType = "video"
+    }
+    else {
+        fileType = "file";
     }
     // console.log("FFCard recieved constant with data: title: ", title, " \n objectType", objectType, "fileContent: ", fileContent, "\n updated at: ", updatedAt);
     return (
@@ -110,16 +116,19 @@ const FFCard = ({
                     handleDownloadClick(FFContent._id);
                     e.stopPropagation();
                 }
-            }} 
+            }}
         >
             <Card.Img variant="top" src={cardImg} style={{ height: '70px', objectFit: 'cover' }} />
             {/* <Card.Body className={styles.cardBody}> */}
             <Card.Body>
                 <div className={styles.cardBody}>
-                    {fileType === "folder" && <AiFillFolderOpen size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFolderOpen>}
-                    {fileType === "pdf" && <AiFillFilePdf size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFilePdf>}
-                    {fileType === "text" && < AiFillFileText size={40} className={`text-muted ${styleUtils.flexCenter} `}></ AiFillFileText>}
-                    {fileType === "image" && <AiFillFileImage size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFileImage>}
+                    {parentId === "6348acd2e1a47ca32e79f46f" && <AiFillRobot size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillRobot>}
+                    {parentId !== "6348acd2e1a47ca32e79f46f" && fileType === "pdf" && <AiFillFilePdf size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFilePdf>}
+                    {parentId !== "6348acd2e1a47ca32e79f46f" && fileType === "text" && < AiFillFileText size={40} className={`text-muted ${styleUtils.flexCenter} `}></ AiFillFileText>}
+                    {parentId !== "6348acd2e1a47ca32e79f46f" && fileType === "image" && <AiFillFileImage size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFileImage>}
+                    {parentId !== "6348acd2e1a47ca32e79f46f" && fileType === "video" && <AiFillVideoCamera size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillVideoCamera>}
+                    {parentId !== "6348acd2e1a47ca32e79f46f" && fileType === "word" && <AiFillFileWord size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFileWord>}
+                    {parentId !== "6348acd2e1a47ca32e79f46f" && fileType === "file" && <AiFillFile size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFile>}
                     <Card.Title className={`${styleUtils.flexCenter} ${styles.cardTitle}`} >
                         {newTitle}
                     </Card.Title>

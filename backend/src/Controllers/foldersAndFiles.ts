@@ -98,7 +98,7 @@ export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknow
         }
         const parentFolder = await FFModel.FolderModel.findById(parentId);
         if (!parentFolder || parentFolder.objectType == "FILE") {
-            throw createHttpError(400, "Incorrecrt parent ID");
+            // throw createHttpError(400, "Incorrecrt parent ID");
         }
         if (!req.file) {
             throw createHttpError(400, "Please provide a file and filetype");

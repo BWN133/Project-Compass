@@ -12,25 +12,25 @@ interface TextInputFieldProps {
 
 
 
-const TextInputField = ({ name, label, register, registerOptions, error, ...props }: TextInputFieldProps) => {
+const DescriptionInputField = ({ name, label, register, registerOptions, error, ...props }: TextInputFieldProps) => {
     return (
 
         <Form.Group className="mb-3" controlId={name + "-input"}>
 
             <Form.Label>{label}</Form.Label>
-            <Form.Control
+            {/* <Form.Control
             {...props}
             {...register(name, registerOptions)}
             isInvalid={!!error}
-        />
-            {/* <textarea
+        /> */}
+            <textarea
                 {...props}
                 {...register(name, registerOptions)}
                 style={{
                     width: '100%',
                 
                 }}
-            ></textarea> */}
+            ></textarea>
             <Form.Control.Feedback type="invalid">
                 {error?.message}
             </Form.Control.Feedback>
@@ -38,4 +38,4 @@ const TextInputField = ({ name, label, register, registerOptions, error, ...prop
     );
 }
 
-export default TextInputField;
+export default DescriptionInputField;

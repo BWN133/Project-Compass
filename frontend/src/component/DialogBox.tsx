@@ -5,6 +5,7 @@ import { FF as FFModel } from "../models/data";
 import TextInputField from "./form/TextInputField";
 import styles from "../style/NotesPage.module.css";
 import { timeLog } from "console";
+import DescriptionInputField from "./form/DescriptionInputField";
 
 interface InputDialogProps {
     onDismiss: () => void,
@@ -84,7 +85,7 @@ export default function InputDialog({ onDismiss, onSubmit, mode, Id, inputSetPro
         error={errors.title}
     />
     const descriptionInputField = 
-    <TextInputField
+    <DescriptionInputField
     // <textarea
         name="description"
         label="Description"
