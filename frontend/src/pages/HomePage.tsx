@@ -12,6 +12,9 @@ import { useNavigation } from "../network/Navigate";
 import InputDialog from "../component/DialogBox";
 import SideNav from "../component/SideNav";
 import ProgressBar from 'react-bootstrap/ProgressBar';
+import * as TodoApi from "../network/todo_api";
+import { User } from "../models/user";
+
 interface DataModelOrImage {
     FFDataModel: FFModel[],
     displayImage: boolean,
@@ -36,6 +39,21 @@ const HomePage = () => {
     });
     const [dialogMode, setDialogMode] = useState<string | null>(null);
     const [showCheckbox, setShowCheckbox] = useState(false);
+
+    const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        async function fetchLoggedInUser() {
+          try {
+            console.log("enter homepage. ")
+            const user = await TodoApi.getLoggedInUser();
+            setLoggedInUser(user);
+          } catch (error) {
+            console.error(error);
+          }
+        }
+        fetchLoggedInUser();
+      }, []);
 
     useEffect(() => {
         async function loadNotes() {
@@ -67,7 +85,7 @@ const HomePage = () => {
 
     useEffect(() => {
         console.log("current Progress bar percent!!!!!!!!!!!:", progressBarPercent)
-    },[progressBarPercent]);
+    }, [progressBarPercent]);
     function updateShowButtons() {
         const selectionCount = selectedItemIds.current.size;
         const newShowButtons = { ...showButtons };
@@ -116,7 +134,7 @@ const HomePage = () => {
         });
         setProgressBar(0);
     }
-
+    
     async function onDeleteClicked() {
         /* for (let i = 0; i < selectedItemIds.length; i++) {
             const currentId: string = selectedItemIds[i];
@@ -140,6 +158,29 @@ const HomePage = () => {
         await dataApi.deleteAll();
     }
 
+    async function showFile(path: String) {
+        try {
+            // const currentPath = window.location.pathname;
+            const currentPath = path;
+            const segments = currentPath.split('/');
+            const fileId = segments[segments.length - 1];
+            if (fileId === 'imgShow') throw new ReferenceError('fileId not Found');
+            // TODO: This data can be acquired from homePage DataModel as it should already been acquired
+            const file = await dataApi.fetchFileById(fileId);
+            // console.log("file type: " + file.mimeType);
+            // setImg(Buffer.from(file.fileContent.buffer.data).toString('base64'));
+            console.log("successfully setted file");
+            const mimeType = file.mimeType;
+            const inputUnit8 = base64ToUint8Array(file.fileContent);
+            const blob = new Blob([inputUnit8], { type: mimeType });
+            const fileUrl = URL.createObjectURL(blob);
+            window.open(fileUrl);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+
     const folderGrid =
         <Row xs={1} md={1} xl={2} className={`g-4 ${styles.notesGrid} ${stylesS.ContentWrapper}`} style={{ marginTop: "20px" }}>
             {DataModel.FFDataModel.map(FF => (
@@ -149,7 +190,11 @@ const HomePage = () => {
                         onclicked={(updatedParentId: string, objectType: string) => {
                             console.log("Objectype recieved is: ", objectType);
                             if (objectType === "FOLDER") navigate(`/folder/${updatedParentId}`);
-                            else navigate(`/imgShow/${updatedParentId}`);
+                            // else navigate(`/imgShow/${updatedParentId}`);
+                            else {
+                                const path = "/imgShow/" + updatedParentId;
+                                showFile(path);
+                            }
                         }}
                         showCheckBox={showCheckbox}
                         handleCheckboxClick={(itemId: string, isChecked: boolean) => {
@@ -182,7 +227,8 @@ const HomePage = () => {
                 <Col xs={3} className="p-0">
                     {/* This section is approximately 20% of the screen width */}
                     <div className={`${stylesS.sidebarWrapper}`}>
-                        {progressBarPercent===0 && <SideNav
+                        {progressBarPercent === 0 && <SideNav
+                            loggedInUser = {loggedInUser}
                             CreateFolderOnclicked={() => setDialogMode(
                                 (currentParentId.current === "6348acd2e1a47ca32e79f46f") ?
                                     "newProject" : "newFolder"
@@ -203,7 +249,7 @@ const HomePage = () => {
                     {showButtons.delete && <Button onClick={() => onDeleteClicked()}> Delete </ Button>}
                     {showButtons.rename && <Button onClick={() => setDialogMode("rename")}> Rename </ Button>}
                     {/* This section is approximately 80% of the screen width */}
-                    {dialogMode && progressBarPercent===0 && <InputDialog
+                    {dialogMode && progressBarPercent === 0 && <InputDialog
                         onDismiss={() => setDialogMode(null)}
                         onSubmit={onInputDialogSubmit}
                         mode={dialogMode}
@@ -213,7 +259,7 @@ const HomePage = () => {
                                 selectedItemIds.current.values().next().value :
                                 currentParentId.current
                         }
-                        inputSetProgressBar={(input: number)=>{
+                        inputSetProgressBar={(input: number) => {
                             console.log("updating current:!!!!!!!!!!", progressBarPercent);
                             setProgressBar(input);
                         }
@@ -221,7 +267,13 @@ const HomePage = () => {
                     />}
                     {!DataModel.displayImage && DataModel.FFDataModel && folderGrid}
                     {DataModel.displayImage && <ShowImgPage />}
-                    {progressBarPercent !== 0 && <ProgressBar animated now={progressBarPercent} label="We are preparing your project guide!!!"/>}
+                    {progressBarPercent !== 0 && <ProgressBar 
+                      style={{
+                        width : '80%',
+                       position : 'absolute',
+                       left : '150px'
+                    }}
+                    animated now={progressBarPercent} label="We are preparing your project guide!!!" />}
                 </Col>
             </Row>
         </>);

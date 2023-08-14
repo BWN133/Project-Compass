@@ -23,3 +23,11 @@
 .pageContainer {
     padding-top: 60px;
 }
+
+.inputText {
+    height: 300px;
+    /* white-space: pre-wrap; */
+    word-break:break-all;
+    /* word-wrap: break-word; */
+    
+}

@@ -3,7 +3,8 @@ import { useForm } from "react-hook-form";
 import * as todoApi from "../network/todo_api";
 import { FF as FFModel } from "../models/data";
 import TextInputField from "./form/TextInputField";
-
+import styles from "../style/NotesPage.module.css";
+import { timeLog } from "console";
 
 interface InputDialogProps {
     onDismiss: () => void,
@@ -41,6 +42,8 @@ export default function InputDialog({ onDismiss, onSubmit, mode, Id, inputSetPro
 
     async function onFormSubmit(input: todoApi.FolderInput) {
         const { title: title, description: description } = input;
+        console.log("onFormSubmit title: " + title);
+        console.log("onFormSubmit description: " + description);
         try {
             let resFF = null;
             if (mode === "newFolder") {
@@ -70,7 +73,8 @@ export default function InputDialog({ onDismiss, onSubmit, mode, Id, inputSetPro
         registerOptions={{ required: "Required" }}
         error={errors.title}
     />
-    const nameInputField = <TextInputField
+    const nameInputField = 
+    <TextInputField
         name="title"
         label="Title"
         type="text"
@@ -79,7 +83,9 @@ export default function InputDialog({ onDismiss, onSubmit, mode, Id, inputSetPro
         registerOptions={{ required: "Required" }}
         error={errors.title}
     />
-    const descriptionInputField = <TextInputField
+    const descriptionInputField = 
+    <TextInputField
+    // <textarea
         name="description"
         label="Description"
         type="text"
@@ -87,7 +93,21 @@ export default function InputDialog({ onDismiss, onSubmit, mode, Id, inputSetPro
         register={register}
         registerOptions={{ required: "Required" }}
         error={errors.title}
+        className={`${styles.inputText}`} 
+        
     />
+
+//     <textarea
+//     name="description"
+//     // label="Description"
+//     // type="text"
+//     placeholder="Please be as detailed as possible"
+//     // register={register}
+//     // registerOptions={{ required: "Required" }}
+//     // error={errors.title}
+//     className={`${styles.inputText}`} 
+    
+// />
     return (
         <Modal show onHide={onDismiss}>
             <Modal.Header closeButton>

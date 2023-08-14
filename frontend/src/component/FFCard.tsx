@@ -1,4 +1,4 @@
-import { AiFillFolder } from "react-icons/ai";
+import { AiFillFileImage, AiFillFilePdf, AiFillFileText, AiFillFolder, AiFillFolderOpen, AiFillGithub, AiOutlineFileText } from "react-icons/ai";
 import styleUtils from "../style/utils.module.css";
 import styles from "../style/FFCard.module.css";
 import { Card, Form, Button } from "react-bootstrap";
@@ -36,44 +36,71 @@ const FFCard = ({
         objectType,
         __type,
     } = FFContent;
+    
     const strObjecType: string = objectType ? objectType : "FOLDER";
     const checkForm = <div>
-    <Form >
-        <Form.Check
-            type="checkbox"
-            defaultChecked={false}
-            onClick={(e) => {
-                const target = e.target as HTMLInputElement;
-                handleCheckboxClick(FFContent._id, target.checked);
-                e.stopPropagation();
-            }}
-        />
-    </Form>
+    
+        <Form >
+            <Form.Check
+                  style={{
+                   position : 'absolute',
+                   left : '445px',
+                   backgroundColor : 'blue'
+                }}
+                type="checkbox"
+                defaultChecked={false}
+                onClick={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    handleCheckboxClick(FFContent._id, target.checked);
+                    e.stopPropagation();
+                }}
+            />
+        </Form>
     </div>
 
-    const previewButton = <Button variant="primary" onClick={(e) => {
-        onclicked(FFContent._id, strObjecType);
-        e.stopPropagation();
+    const previewButton = <Button
+        style={{ float: 'right' }}
+        variant="primary"
+        onClick={(e) => {
+            onclicked(FFContent._id, strObjecType);
+            e.stopPropagation();
 
-    }}>preview</Button>;
+        }}>preview</Button>;
     let cardImg = logo;
-    if(subject === "ECON"){
+    if (subject === "ECON") {
         cardImg = econLogo;
     }
-    if(subject === "HIS"){
+    if (subject === "HIS") {
         cardImg = hisLogo;
     }
-    if(subject === "CS"){
+    if (subject === "CS") {
         cardImg = csLogo;
     }
-    const description =  <Card.Text>
-    Some quick example text to build on the card title and make up the
-    bulk of the card's content.
+    const description = <Card.Text>
+        Some quick example text to build on the card title and make up the
+        bulk of the card's content.
     </Card.Text>
+    let newTitle;
+    if ( FFContent.title.length >= 20) {
+        newTitle = FFContent.title.substring(0,20) + "...";
+    } else {
+        newTitle = FFContent.title;
+    }
+    console.log("file type: " + FFContent.mimeType);
+    let fileType;
+    if (FFContent.mimeType === "image/jpeg") {
+        fileType = "image";
+    } else if (FFContent.mimeType === "text/plain") {
+        fileType = "text";
+    } else if (FFContent.mimeType ===  "application/pdf") {
+        fileType = "pdf";
+    } else {
+        fileType = "folder";
+    }
     // console.log("FFCard recieved constant with data: title: ", title, " \n objectType", objectType, "fileContent: ", fileContent, "\n updated at: ", updatedAt);
     return (
         <Card
-            className={`${styles.noteCard}` }
+            className={`${styles.noteCard}`}
             style={{ width: '30rem' }}
             onClick={(e) => {
                 if (strObjecType === "FOLDER") {
@@ -83,22 +110,36 @@ const FFCard = ({
                     handleDownloadClick(FFContent._id);
                     e.stopPropagation();
                 }
-            }}
+            }} 
         >
-            <Card.Img variant="top" src={cardImg} style={{height:'70px',objectFit: 'cover'}}/>
+            <Card.Img variant="top" src={cardImg} style={{ height: '70px', objectFit: 'cover' }} />
             {/* <Card.Body className={styles.cardBody}> */}
             <Card.Body>
                 <div className={styles.cardBody}>
-                <AiFillFolder size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFolder>
-                <Card.Title className={`${styleUtils.flexCenter} ${styles.cardTitle}`} >
-                    {FFContent.title}
-                </Card.Title>
-                {showCheckBox && checkForm}
-                {(strObjecType !== "FOLDER") && previewButton}
+                    {fileType === "folder" && <AiFillFolderOpen size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFolderOpen>}
+                    {fileType === "pdf" && <AiFillFilePdf size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFilePdf>}
+                    {fileType === "text" && < AiFillFileText size={40} className={`text-muted ${styleUtils.flexCenter} `}></ AiFillFileText>}
+                    {fileType === "image" && <AiFillFileImage size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFileImage>}
+                    <Card.Title className={`${styleUtils.flexCenter} ${styles.cardTitle}`} >
+                        {newTitle}
+                    </Card.Title>
+                    {showCheckBox && checkForm}
+                    {(strObjecType !== "FOLDER") &&
+                        <div style={{
+                            position: 'absolute', right: '40px',
+
+                        }}>
+                            <Button
+                                variant="primary"
+                                onClick={(e) => {
+                                    onclicked(FFContent._id, strObjecType);
+                                    e.stopPropagation();
+                                }}>preview</Button></div>
+                    }
                 </div>
                 {(strObjecType === "FOLDER") && description}
                 {/* <Button onClick={() => onclicked(FFContent._id, strObjecType)}>preview</Button> */}
-               
+
             </Card.Body>
         </Card>)
 }

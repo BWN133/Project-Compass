@@ -4,13 +4,22 @@ import stylesU from '../style/App.module.css';
 import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
 import { FaGem, FaHeart } from 'react-icons/fa';
 import logo from '../staticSrc/logo512.png';
+import * as TodoApi from "../network/todo_api";
+import { User } from "../models/user";
+
 interface SideNavProps {
+  loggedInUser: User | null,
   CreateFolderOnclicked: () => void,
   CreateFileOnclicked: () => void,
   SeleteItemOnclicked: () => void,
   DeleteAllOnclicked: () => void,
 }
+
+
+  
+
 const SideNav = ({
+  loggedInUser,
   CreateFolderOnclicked,
   CreateFileOnclicked,
   SeleteItemOnclicked,
@@ -20,7 +29,7 @@ const SideNav = ({
       <Menu >
         <div className={`${stylesU.userProfile}`}>
           <img src={logo} alt="User" className={`${stylesU.profilePic}`} />
-          <h3>Bowen Yang</h3>
+          <h3>{loggedInUser?.username}</h3>
         </div>
         <MenuItem onClick={() => CreateFolderOnclicked()}> Create New</MenuItem>
         <MenuItem onClick={() => CreateFileOnclicked()}> Upload File</MenuItem>

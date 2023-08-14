@@ -33,6 +33,7 @@ function App() {
       try {
         console.log("11111111111");
         const user = await TodoApi.getLoggedInUser();
+        
         console.log("2222222222222222");
         setLoggedInUser(user);
       } catch (error) {

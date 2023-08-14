@@ -17,7 +17,7 @@ const NavBar = ({ loggedInUser, onSignUpClicked, onLoginClicked, onLogoutSuccess
     return (
         <Navbar bg="primary" variant="dark" expand="sm" sticky="top" style={{ position: "fixed", width: "100%" }}>
             <Container>
-                <Navbar.Brand onClick={() => { window.location.href = "http://localhost:3000/" }}>
+                <Navbar.Brand onClick={() => { window.location.href = "http://localhost:3000/home" }}>
                     Project Compass
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="main-navbar" />
