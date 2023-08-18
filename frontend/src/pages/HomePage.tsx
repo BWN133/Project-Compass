@@ -14,6 +14,7 @@ import SideNav from "../component/SideNav";
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import * as TodoApi from "../network/todo_api";
 import { User } from "../models/user";
+import env from "../utils/validateEnv";
 
 interface DataModelOrImage {
     FFDataModel: FFModel[],
