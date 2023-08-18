@@ -1,5 +1,5 @@
 export interface BufferType {
-    buffer:{
+    buffer: {
         data: Buffer,
         type: string,
     }
@@ -14,7 +14,7 @@ export interface FF {
     parentId: string,
     objectType?: string,
     __type: string,
-    mimeType: string
+    mimeType: string,
+    summary?: string,
+    logo?: string
 }
-
-

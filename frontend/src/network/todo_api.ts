@@ -1,6 +1,8 @@
 import { FF as FFModel } from "../models/data";
 import { ConflictError, UnauthorizedError } from "../errors/http_errors";
 import { User } from "../models/user";
+import { stringify } from "querystring";
+import env from "../utils/validateEnv";
 
 async function fetchDataWrapper(input: RequestInfo, init?: RequestInit) {
     const response = await fetch(input, init);
@@ -143,21 +145,35 @@ async function populateTask(taskInfo: TaskInfo) {
 }
 
 export async function createProject(title: string, description: any) {
-    const responsePromise = fetchDataWrapper("/api/FF/openai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title, description: description }),
+    let response = await fetchDataWrapper('/api/FF/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            title: title,
+            description: description
+        })
     })
-    const newProjectPromise = uploadItem(title, "6348acd2e1a47ca32e79f46f", "folder")
-    const [response, newProject] = await Promise.all([responsePromise, newProjectPromise])
-    const message = await response.json();
-    console.log(message)
-    const tasks = JSON.parse(message).tasks
+    let newProject = await response.json()
+    const tasks = newProject.tasks
+    console.log(`In Frontend TODO Api successfully invoked OpenAI API with the following response message:\n${JSON.stringify(newProject)}`)
+
+    response = await fetchDataWrapper('/api/FF/folder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            title: title,
+            parentId: env.REACT_APP_DEFAULT_PARENT_ID,
+            summary: newProject.summary,
+            logo: newProject.logo
+        })
+    })
+    newProject = await response.json()
+
     /* Promise.all(tasks.map(async (task: TaskInfo) => {
         await createTask(task, newProject._id)
     })) */
     for (const taskInfo of tasks) {
-        const newTask = await uploadItem(taskInfo.name, newProject._id, "folder")
+        const newTask = await uploadItem(taskInfo.name, newProject._id, 'folder')
         taskInfo._id = newTask._id
     }
     Promise.all(tasks.map(populateTask))

@@ -21,7 +21,7 @@ const storage = new GridFsStorage({
 
 const upload = multer({ storage });
 
-router.get("/", FFController.GetHomeFolder);
+// router.get("/", FFController.GetHomeFolder);
 
 router.post("/folder", FFController.createFolder);
 
@@ -32,7 +32,7 @@ router.post("/file", upload.single('fileContent'), FFController.createFile);
 
 router.get("/folder/:parentId", FFController.GetFileFromParent);
 
-router.get("/folderG/:parentId", FFController.GetGrandParentFolder);
+// router.get("/folderG/:parentId", FFController.GetGrandParentFolder);
 
 router.get("/file/:fileId", FFController.GetFileDataCached, FFController.GetFile);
 

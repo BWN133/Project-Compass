@@ -12,6 +12,7 @@
     "bootstrap": "^5.2.3",
     "buffer": "^6.0.3",
     "cors": "^2.8.5",
+    "envalid": "^7.3.1",
     "imagefrombuffer": "^1.0.12",
     "react": "^18.2.0",
     "react-bootstrap": "^2.7.0",

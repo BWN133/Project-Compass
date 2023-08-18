@@ -17,7 +17,7 @@ interface FFCardProps {
     subject?: string
 }
 
-const FFCard = ({
+export default function FFCard({
     FFContent,
     onclicked,
     className,
@@ -25,16 +25,17 @@ const FFCard = ({
     handleCheckboxClick,
     handleDownloadClick,
     subject
-}: FFCardProps) => {
+}: FFCardProps) {
     const {
-        _id,
+        /* _id,
         title,
         fileContent,
         createdAt,
         updatedAt,
-        parentId,
+        parentId, */
         objectType,
-        __type,
+        summary,
+        logo
     } = FFContent;
 
     const strObjecType: string = objectType ? objectType : "FOLDER";
@@ -118,7 +119,7 @@ const FFCard = ({
                 }
             }}
         >
-            <Card.Img variant="top" src={cardImg} style={{ height: '70px', objectFit: 'cover' }} />
+            {logo && <Card.Img variant="top" src={logo} style={{ height: '70px', objectFit: 'cover' }} />}
             {/* <Card.Body className={styles.cardBody}> */}
             <Card.Body>
                 <div className={styles.cardBody}>
@@ -130,28 +131,13 @@ const FFCard = ({
                     {parentId !== "6348acd2e1a47ca32e79f46f" && fileType === "word" && <AiFillFileWord size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFileWord>}
                     {parentId !== "6348acd2e1a47ca32e79f46f" && fileType === "file" && <AiFillFile size={40} className={`text-muted ${styleUtils.flexCenter} `}></AiFillFile>}
                     <Card.Title className={`${styleUtils.flexCenter} ${styles.cardTitle}`} >
-                        {newTitle}
+                        {FFContent.title}
                     </Card.Title>
                     {showCheckBox && checkForm}
-                    {(strObjecType !== "FOLDER") &&
-                        <div style={{
-                            position: 'absolute', right: '40px',
-
-                        }}>
-                            <Button
-                                variant="primary"
-                                onClick={(e) => {
-                                    onclicked(FFContent._id, strObjecType);
-                                    e.stopPropagation();
-                                }}>preview</Button></div>
-                    }
                 </div>
-                {(strObjecType === "FOLDER") && description}
+                {strObjecType === "FOLDER" && summary && <Card.Text>{summary}</Card.Text>}
                 {/* <Button onClick={() => onclicked(FFContent._id, strObjecType)}>preview</Button> */}
 
             </Card.Body>
         </Card>)
 }
-
-
-export default FFCard;

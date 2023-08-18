@@ -12,21 +12,23 @@ const baseOptions = {
 
 
 const folderSchema = new Schema({
-    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID) },
+    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULT_PARENT_ID) },
     title: { type: String, defualt: "none" },
-    parentId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID) },
+    parentId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULT_PARENT_ID) },
     objectType: { type: String },
+    summary: { type: String },
+    logo: { type: String }
 }, baseOptions);
 
 const fileSchema = new Schema({
-    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID) },
+    userId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULT_PARENT_ID) },
     title: { type: String, defualt: "none" },
-    parentId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULTPAGE_PARENTID) },
+    parentId: { type: Schema.Types.ObjectId, default: new mongoose.Types.ObjectId(env.DEFAULT_PARENT_ID) },
     objectType: { type: String },
     fileMeta: { type: String },
-    chunkId: {type: Schema.Types.ObjectId},
-    fileSize: {type: Number},
-    mimeType: {type: String}
+    chunkId: { type: Schema.Types.ObjectId },
+    fileSize: { type: Number },
+    mimeType: { type: String }
 }, baseOptions);
 
 const fileMetaSchema = new Schema({ filename: { type: String } }, { collection: 'uploads.files' });

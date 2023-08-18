@@ -7,7 +7,7 @@ import multer from "multer";
 import env from "../util/validateEnv";
 import { getCache } from '../cache'
 import { parse, stringify, toJSON, fromJSON } from 'flatted';
-import getResponse from "../util/openaiConnection";
+import generateProjectDetails from "../util/openaiConnection";
 
 
 // TODO: Test create with postman
@@ -18,30 +18,34 @@ export const fileType = ["img", "txt"];
 interface CreateFolderBody {
     title?: string,
     parentId?: string,
+    summary?: string,
+    logo?: string
 }
 
 export const createFolder: RequestHandler<unknown, unknown, CreateFolderBody, unknown> = async (req, res, next) => {
     //TODO:  Authentication
-    const title = req.body.title;
-    const parentId = req.body.parentId;
-    console.log("Here is title recieved: ", title);
-    console.log("here is parentId recieved;", parentId);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { title, parentId, summary, logo } = req.body
+    console.log('Here is title recieved: ', title)
+    console.log('here is parentId recieved: ', parentId)
     try {
         if (!title) {
-            throw createHttpError(400, "Folder must have a title");
+            throw createHttpError(400, 'Folder must have a title')
         }
         const foldersAndFiles = await FFModel.FolderModel.create({
             userId: undefined,
             title: title,
             parentId: parentId,
-            objectType: "FOLDER",
-        });
+            objectType: 'FOLDER',
+            ...summary && { summary: summary },
+            ...logo && { logo: logo }
+        })
 
-        res.status(201).json(foldersAndFiles);
+        res.status(201).json(foldersAndFiles)
     } catch (error) {
-        next(error);
+        next(error)
     }
-};
+}
 
 export const DeleteAllFolders: RequestHandler = async (req, res, next) => {
     const cache = await getCache();
@@ -105,7 +109,7 @@ export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknow
         }
         const title = req.file.originalname;
         const chunkId = req.file.id;
-        
+
         console.log(req.file.id);
         const foldersAndFiles = await FFModel.FileModel.create({
             userId: undefined,
@@ -132,7 +136,7 @@ export const createFile: RequestHandler<unknown, unknown, CreateFileBody, unknow
         next(error);
     }
 };
-
+/* 
 export const getParentFolder: RequestHandler = async (req, res, next) => {
     const parentId = env.DEFAULTPAGE_PARENTID;
     try {
@@ -162,13 +166,13 @@ export const GetGrandParentFolder: RequestHandler = async (req, res, next) => {
         next(error);
     }
 }
-
+ */
 //TODO: take in file object, return file Data
 const getFileHelper = async (file: FFModel.File, id: string) => {
     if (!file) {
         throw createHttpError(404, "File not found");
     }
-    const fileContents = await FFModel.chunkModel.find({ files_id: file.chunkId}).lean();//.sort("-postDate") /// Lean Update
+    const fileContents = await FFModel.chunkModel.find({ files_id: file.chunkId }).lean();//.sort("-postDate") /// Lean Update
     if (!fileContents[0].data) {
         throw createHttpError(404, "File data missing in Chunk");
     }
@@ -244,7 +248,7 @@ export const GetFileFromParent: RequestHandler = async (req, res, next) => {
         next(error);
     }
 }
-
+/* 
 export const GetHomeFolder: RequestHandler = async (req, res, next) => {
     const parentId = env.DEFAULTPAGE_PARENTID;
     try {
@@ -258,8 +262,7 @@ export const GetHomeFolder: RequestHandler = async (req, res, next) => {
         next(error);
     }
 }
-
-
+ */
 export const GetFileFromParentHelper = async (parentId: string, next: NextFunction) => {
     const cache = await getCache();
     try {
@@ -297,12 +300,11 @@ export const GetFileFromParentHelperLean = async (parentId: string, next: NextFu
         }
         const leanSubFileCursorObject = await FFModel.BaseModel.find({ parentId: parentId }).lean();
         const result = [];
-        for(let index = 0; index < leanSubFileCursorObject.length; index++)
-        {
+        for (let index = 0; index < leanSubFileCursorObject.length; index++) {
             const curDoc = leanSubFileCursorObject[index];
-            if(curDoc.objectType == 'FOLDER'){
+            if (curDoc.objectType == 'FOLDER') {
                 result.push(curDoc);
-            }else{
+            } else {
                 const fileResult = await getFileHelper(<FFModel.File>curDoc, curDoc._id.toString());
                 result.push(fileResult);
             }
@@ -332,7 +334,6 @@ const deleteFile = async (file: FFModel.File) => {
         document.remove();
     }
     fileMeta[0].remove();
-    return
 };
 
 
@@ -423,7 +424,8 @@ export const renameItem: RequestHandler<unknown, unknown, RenameItemBody, unknow
         if (!item) throw createHttpError(404, "Item not found");
 
         item.title = title;
-        res.status(200).json(await item.save());
+        const response = await item.save()
+        res.status(200).json(response);
     } catch (error) {
         next(error);
     }
@@ -443,9 +445,8 @@ export const getOpenaiResponse: RequestHandler<unknown, unknown, getOpenaiRespon
         if (!title) throw createHttpError(400, "Project must have a name");
         if (!description) throw createHttpError(400, "Project must have a description");
 
-        const response = await getResponse(title, description)
-
-        res.status(200).json(response.data.choices[0].message?.content);
+        const response = await generateProjectDetails(title, description)
+        res.status(200).json(response);
     } catch (error) {
         next(error);
     }

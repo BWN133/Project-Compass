@@ -25,8 +25,9 @@ interface ButtonStates {
 }
 
 const HomePage = () => {
+    const defaultParentId = env.REACT_APP_DEFAULT_PARENT_ID
     const { navigate } = useNavigation();
-    const currentParentId = useRef("6348acd2e1a47ca32e79f46f");
+    const currentParentId = useRef(defaultParentId);
     const selectedItemIds = useRef<Set<string>>(new Set());
     const [DataModel, setDataModel] = useState<DataModelOrImage>({
         FFDataModel: [],
@@ -44,22 +45,22 @@ const HomePage = () => {
 
     useEffect(() => {
         async function fetchLoggedInUser() {
-          try {
-            console.log("enter homepage. ")
-            const user = await TodoApi.getLoggedInUser();
-            setLoggedInUser(user);
-          } catch (error) {
-            console.error(error);
-          }
+            try {
+                console.log("enter homepage. ")
+                const user = await TodoApi.getLoggedInUser();
+                setLoggedInUser(user);
+            } catch (error) {
+                console.error(error);
+            }
         }
         fetchLoggedInUser();
-      }, []);
+    }, []);
 
     useEffect(() => {
         async function loadNotes() {
             const currentPath = window.location.pathname;
             const segments = currentPath.split("/");
-            const parentId = (segments.length === 2) ? "6348acd2e1a47ca32e79f46f" : segments[segments.length - 1];
+            const parentId = (segments.length === 2) ? defaultParentId : segments[segments.length - 1];
             currentParentId.current = parentId;
             console.log("current segment length:", segments.length);
             try {
@@ -134,7 +135,7 @@ const HomePage = () => {
         });
         setProgressBar(0);
     }
-    
+
     async function onDeleteClicked() {
         /* for (let i = 0; i < selectedItemIds.length; i++) {
             const currentId: string = selectedItemIds[i];
@@ -228,9 +229,9 @@ const HomePage = () => {
                     {/* This section is approximately 20% of the screen width */}
                     <div className={`${stylesS.sidebarWrapper}`}>
                         {progressBarPercent === 0 && <SideNav
-                            loggedInUser = {loggedInUser}
+                            loggedInUser={loggedInUser}
                             CreateFolderOnclicked={() => setDialogMode(
-                                (currentParentId.current === "6348acd2e1a47ca32e79f46f") ?
+                                (currentParentId.current === defaultParentId) ?
                                     "newProject" : "newFolder"
                             )}
                             CreateFileOnclicked={() => setDialogMode("newFile")}
@@ -267,13 +268,13 @@ const HomePage = () => {
                     />}
                     {!DataModel.displayImage && DataModel.FFDataModel && folderGrid}
                     {DataModel.displayImage && <ShowImgPage />}
-                    {progressBarPercent !== 0 && <ProgressBar 
-                      style={{
-                        width : '80%',
-                       position : 'absolute',
-                       left : '150px'
-                    }}
-                    animated now={progressBarPercent} label="We are preparing your project guide!!!" />}
+                    {progressBarPercent !== 0 && <ProgressBar
+                        style={{
+                            width: '80%',
+                            position: 'absolute',
+                            left: '150px'
+                        }}
+                        animated now={progressBarPercent} label="We are preparing your project guide!!!" />}
                 </Col>
             </Row>
         </>);
