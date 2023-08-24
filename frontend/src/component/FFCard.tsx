@@ -141,7 +141,7 @@ export default function FFCard({
                 </div>
                 {strObjecType === "FOLDER" && summary && <Card.Text>{summary}</Card.Text>}
                 {/* <Button onClick={() => onclicked(FFContent._id, strObjecType)}>preview</Button> */}
-
+                {strObjecType !== "FOLDER" && previewButton}
             </Card.Body>
         </Card>)
 }
