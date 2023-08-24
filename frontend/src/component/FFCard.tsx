@@ -31,11 +31,12 @@ export default function FFCard({
         title,
         fileContent,
         createdAt,
-        updatedAt,
-        parentId, */
+        updatedAt, */
+        parentId,
         objectType,
         summary,
-        logo
+        logo,
+        __type
     } = FFContent;
 
     const strObjecType: string = objectType ? objectType : "FOLDER";
@@ -67,6 +68,7 @@ export default function FFCard({
             e.stopPropagation();
 
         }}>preview</Button>;
+<<<<<<< HEAD
     let cardImg = logo;
     if (subject === "ECON") {
         cardImg = econLogo;
@@ -89,6 +91,8 @@ export default function FFCard({
     }
     console.log("file type: " + FFContent.mimeType);
     console.log("FFCard parentId: " + parentId);
+=======
+>>>>>>> 690d037 (fix conflicts with icon and new background and summary feature)
     let fileType;
     if (FFContent.mimeType === "image/jpeg" || FFContent.mimeType === "image/png") {
         fileType = "image";
