@@ -64,7 +64,7 @@ Start the Redis client, then run 'npm start' in both /frontend and /backend dire
 
 - [Bowen Yang](https://www.linkedin.com/in/bowen-yang133) - Project Leader, Full-Stack Framework Design, Backend Optimization
 - [Yuzhuo Bai](https://www.linkedin.com/in/yuzhuo-bai-0740491ab/) - Redis Cache, Frontend optimization
-- [lingyang Kong](https://www.linkedin.com/in/lingyang-kong-52326b1b0/) - Prompt Engineering, AI Related Functions
+- [Lingyang Kong](https://www.linkedin.com/in/lingyang-kong-52326b1b0/) - Prompt Engineering, AI Related Functions
 
 
 ### Inspirational Projects
