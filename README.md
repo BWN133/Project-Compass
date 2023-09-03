@@ -70,7 +70,7 @@ Start the Redis client, then run 'npm start' in both /frontend and /backend dire
 ### Inspirational Projects
 
 - [instagram-mern](https://github.com/jigar-sable/instagram-mern)
-- [mern-reminder] (https://github.com/codinginflow/MERN-course)
+- [mern-reminder](https://github.com/codinginflow/MERN-course)
 - [Influential-MERN-Tutorial](https://www.youtube.com/watch?v=FcxjCPeicvU&t=11513s)
 
 
