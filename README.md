@@ -1,6 +1,6 @@
 # Project Compass
 
-A chatbot-driven tool for generating structured guides for academic assignments.
+A chatbot-driven tool for generating structured guides for academic assignments. Original on Gitlab: https://gitlab.com/BWN133/cloud_todo
 
 ## Introduction
 
